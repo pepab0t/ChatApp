@@ -1,16 +1,37 @@
-from ..database.models import User, Request, Message
-from ..database import db
-from ..exceptions import EntityNotFound
+from .database.models import User, Request, Message
+from .database import db
+from .exceptions import DatabaseError
+from sqlalchemy.exc import IntegrityError
+from .entity import UserRegisterEntity
 
 
-def add_friends(request):
+def register_user(user: UserRegisterEntity):
+    new_user = User(**user.dict())
+    db.session.add(new_user)
+    try:
+        db.session.commit()
+    except IntegrityError as e:
+        raise DatabaseError(e.args[0], 422)
+
+    db.session.refresh(new_user)
+    del new_user.password
+    return new_user
+
+
+def add_friends(request: Request):
     request.sender.friends.append(request.receiver)
     request.receiver.friends.append(request.sender)
     request.accepted = True
     db.session.commit()
 
 
-def create_request(user1, user2):
+def remove_friends(user1: User, user2: User):
+    user1.friends.remove(user2)
+    user2.friends.remove(user1)
+    db.session.commit()
+
+
+def create_request(user1: User, user2: User):
     r = Request(sender=user1, receiver=user2)
     db.session.add(r)
     db.session.commit()
@@ -42,7 +63,7 @@ def get_users_by_text(text: str):
     return User.query.filter(User.username.like(text)).order_by(User.username).all()
 
 
-def create_message(sender, receiver, text):
+def create_message(sender: User, receiver: User, text: str):
     message = Message(sender=sender, receiver=receiver, text=text)
     db.session.add(message)
     db.session.commit()

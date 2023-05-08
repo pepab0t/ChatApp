@@ -31,6 +31,7 @@ def create_app():
     return app
 
 
-def create_socketio(app):
+def create_socketio():
+    app = create_app()
     socket = SocketIO(app, cors_allowed_origins="*")
-    return socket
+    return socket, app

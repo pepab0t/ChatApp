@@ -4,8 +4,8 @@ from datetime import datetime
 
 friends = db.Table(
     "friends",
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
-    db.Column("friend_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id", ondelete="CASCADE")),
+    db.Column("friend_id", db.Integer, db.ForeignKey("user.id", ondelete="CASCADE")),
     # db.UniqueConstraint("user_id", "friend_id", name="friends"),
 )
 
@@ -57,14 +57,20 @@ class Message(db.Model):
     __tablename__ = "message"
 
     id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    receiver_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    sender_id = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
+    receiver_id = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
     timestamp = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     text = db.Column(db.String(256), nullable=False)
 
     sender = db.relationship("User", backref="messages_sent", foreign_keys=[sender_id])
     receiver = db.relationship(
-        "User", backref="messages_received", foreign_keys=[receiver_id]
+        "User",
+        backref="messages_received",
+        foreign_keys=[receiver_id],
     )
 
     def dict(self):

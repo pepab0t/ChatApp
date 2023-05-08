@@ -1,4 +1,4 @@
-from . import repository
+from .. import repository
 from ..exceptions import EntityNotFound, Forbidden, InvalidRequestException
 
 
@@ -45,6 +45,18 @@ def approve_request(user_id: int, request_id: int):
     return request.dict(), 201
 
 
+def remove_friend(user_id: int, username: str):
+    if (user1 := repository.get_user_by_id(user_id)) is None:
+        raise EntityNotFound(f"Request ID `{user_id}` not found")
+    if (user2 := repository.get_user_by_username(username)) is None:
+        raise EntityNotFound(f"Request ID `{username}` not found")
+
+    if user2 not in set(user1.friends):
+        raise InvalidRequestException("Users are not friends")
+
+    repository.remove_friends(user1, user2)
+
+
 def search(user_id: int, text: str):
     user = repository.get_user_by_id(user_id)
     text = f"%{text}%"
@@ -66,3 +78,8 @@ def send_message(user_id: int, username: str, text: str):
 
     message = repository.create_message(sender, receiver, text)
     return message.dict(), 201
+
+
+def get_friends(user_id: int):
+    user = repository.get_user_by_id(user_id)
+    return [friend.dict() for friend in user.friends], 200
