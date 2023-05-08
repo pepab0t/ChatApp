@@ -1,9 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask
 from flask_socketio import SocketIO, send
-from flask_sqlalchemy import SQLAlchemy
 from dotenv import get_key
 
-from .database import db, DB_NAME, models
+from .database import db, DB_NAME
 from .error_handlers import (
     handle_invalid_body,
     handle_database_error,
