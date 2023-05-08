@@ -1,9 +1,8 @@
-from application import create_app, create_socketio
+from application import create_socketio
 
 
 def main():
-    app = create_app()
-    socketio = create_socketio(app)
+    socketio, app = create_socketio()
 
     socketio.run(app, host="0.0.0.0", port=5000, debug=True)
 

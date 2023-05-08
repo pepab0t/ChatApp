@@ -16,6 +16,13 @@ def add_friend(user_id: int):
     return jsonify(req), code
 
 
+@api.route("/delete_friend/<string:username>", methods=["DELETE"])
+@token_valid
+def remove_friend(user_id: int, username: str):
+    service.remove_friend(user_id, username)
+    return jsonify({"message": "success"}), 204
+
+
 @api.route("/send_request/<string:username>", methods=["POST"])
 @token_valid
 def send_request(user_id: int, username: str):
@@ -47,3 +54,10 @@ def send_message(user_id: int, username: str):
         raise InvalidRequestException("Missing body key `message`")
     result, code = service.send_message(user_id, username, message)
     return jsonify(result), code
+
+
+@api.route("/friends", methods=["GET"])
+@token_valid
+def get_friends(user_id: int):
+    friends, code = service.get_friends(user_id)
+    return jsonify(friends), code

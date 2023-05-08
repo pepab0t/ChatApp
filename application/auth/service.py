@@ -1,9 +1,8 @@
 from ..exceptions import InvalidRequestException, EntityNotFound, Unauthenticated
 from ..entity import UserLoginEntity, UserRegisterEntity, ValidationError
-from typing import Any
 from . import utils
 
-from . import repository
+from .. import repository
 
 
 def prepare_validation_error(err: ValidationError):
