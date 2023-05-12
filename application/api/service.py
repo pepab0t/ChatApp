@@ -21,11 +21,13 @@ def send_request(user_id: int, user_to: str):
         raise InvalidRequestException("users are already friends", 400)
 
     request = repository.create_request(user1, user2)
+    if request is None:
+        raise InvalidRequestException("This request already exists")
     return request.dict(), 201
 
 
-def get_all_requests_received(user_id):
-    requests = repository.get_all_requests_received(user_id)
+def get_all_pending_requests_received(user_id):
+    requests = repository.get_all_pending_requests_received(user_id)
     if requests is None:
         raise EntityNotFound(f"User ID `{user_id}` not found")
 
@@ -33,7 +35,7 @@ def get_all_requests_received(user_id):
 
 
 def approve_request(user_id: int, request_id: int):
-    if (request := repository.get_request_by_id(request_id)) is None:
+    if (request := repository.get_opened_request_by_id(request_id)) is None:
         raise EntityNotFound(f"Request ID `{request_id}` not found")
     if (user := repository.get_user_by_id(user_id)) is None:
         raise EntityNotFound(f"Request ID `{user_id}` not found")
@@ -43,6 +45,19 @@ def approve_request(user_id: int, request_id: int):
 
     repository.add_friends(request)
     return request.dict(), 201
+
+
+def decline_request(user_id: int, request_id: int):
+    if (request := repository.get_opened_request_by_id(request_id)) is None:
+        raise EntityNotFound(f"Request ID `{request_id}` not found")
+    if (user := repository.get_user_by_id(user_id)) is None:
+        raise EntityNotFound(f"Request ID `{user_id}` not found")
+
+    if request.receiver != user:
+        raise Forbidden(f"User {user_id} not allowed to decline request")
+
+    request = repository.decline_request(request)
+    return request.dict(), 200
 
 
 def remove_friend(user_id: int, username: str):

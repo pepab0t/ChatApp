@@ -16,6 +16,16 @@ def add_friend(user_id: int):
     return jsonify(req), code
 
 
+@api.route("/decline", methods=["POST"])
+@token_valid
+def decline_request(user_id: int):
+    if (request_id := request.args.get("request_id", type=int)) is None:
+        raise InvalidRequestException("no query parameter `request_id`")
+
+    req, code = service.decline_request(user_id, request_id)
+    return jsonify(req), code
+
+
 @api.route("/delete_friend/<string:username>", methods=["DELETE"])
 @token_valid
 def remove_friend(user_id: int, username: str):
@@ -33,7 +43,7 @@ def send_request(user_id: int, username: str):
 @api.route("/requests", methods=["GET"])
 @token_valid
 def get_requests(user_id: int):
-    requests = service.get_all_requests_received(user_id)
+    requests = service.get_all_pending_requests_received(user_id)
     return jsonify(requests), 200
 
 
