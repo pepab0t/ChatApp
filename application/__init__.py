@@ -19,9 +19,11 @@ def create_app():
 
     from .auth.controller import auth
     from .api.controller import api
+    from .views import views
 
     app.register_blueprint(auth)
     app.register_blueprint(api)
+    app.register_blueprint(views)
 
     app.register_error_handler(handle_invalid_body.exc, handle_invalid_body)
     app.register_error_handler(handle_database_error.exc, handle_database_error)

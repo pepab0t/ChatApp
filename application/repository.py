@@ -2,6 +2,7 @@ from .database.models import User, Request, Message
 from .database import db
 from .exceptions import DatabaseError
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import and_, or_
 from .entity import UserRegisterEntity
 
 
@@ -25,6 +26,12 @@ def add_friends(request: Request):
     db.session.commit()
 
 
+def decline_request(request: Request):
+    request.accepted = False
+    db.session.commit()
+    return request
+
+
 def remove_friends(user1: User, user2: User):
     user1.friends.remove(user2)
     user2.friends.remove(user1)
@@ -32,6 +39,17 @@ def remove_friends(user1: User, user2: User):
 
 
 def create_request(user1: User, user2: User):
+    r = (
+        Request.query.filter_by(accepted=None)
+        .filter(
+            and_((Request.sender == user1), (Request.receiver == user2))
+            | and_((Request.sender == user2), (Request.receiver == user1))
+        )
+        .first()
+    )
+    if r is not None:
+        raise DatabaseError("This request already exists", 422)
+
     r = Request(sender=user1, receiver=user2)
     db.session.add(r)
     db.session.commit()
@@ -39,16 +57,21 @@ def create_request(user1: User, user2: User):
     return r
 
 
-def get_all_requests_received(user_id: int):
+def get_all_pending_requests_received(user_id: int):
     user = User.query.get(user_id)
     if user is None:
         return None
 
-    return user.requests_received
+    return filter(lambda x: x.accepted is None, user.requests_received)
 
 
 def get_request_by_id(id: int):
     return Request.query.get(id)
+
+
+def get_opened_request_by_id(id: int):
+    out = get_request_by_id(id)
+    return out if out.accepted is None else None
 
 
 def get_user_by_id(id: int):

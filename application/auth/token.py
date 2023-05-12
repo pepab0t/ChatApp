@@ -2,6 +2,13 @@ from flask import request
 from .utils import validate_jwt
 from ..exceptions import Unauthenticated
 from functools import wraps
+import inspect
+from functools import cache
+
+
+@cache
+def arg_available(argname: str, fn):
+    return argname in set(inspect.getargspec(fn).args)
 
 
 def token_valid(fn):
@@ -17,6 +24,8 @@ def token_valid(fn):
         if payload is None:
             raise Unauthenticated()
 
-        return fn(*args, **kwds, user_id=payload["id"])
+        if arg_available("user_id", fn):
+            return fn(*args, **kwds, user_id=payload["id"])
+        return fn(*args, **kwds)
 
     return wrapper
