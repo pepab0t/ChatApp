@@ -8,7 +8,7 @@ from functools import cache
 
 @cache
 def arg_available(argname: str, fn):
-    return argname in set(inspect.getargspec(fn).args)
+    return argname in set(inspect.signature(fn).parameters.keys())
 
 
 def token_valid(fn):

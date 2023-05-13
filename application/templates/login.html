@@ -6,11 +6,11 @@ Login
 {% endblock %}
 
 {% block body%}
-<form action="{{ url_for('') }}" method="POST">
+<form action="{{ url_for('views.login') }}" method="POST">
     <label for="">username</label>
-    <input type="text">
+    <input type="text" name="username">
     <label for="">password</label>
-    <input type="password">
+    <input type="password" name="password">
     <input type="submit">
 </form>
 {% endblock %}

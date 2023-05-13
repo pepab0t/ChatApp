@@ -9,23 +9,30 @@ app = create_app()
 
 os.system("rm instance/database.db")
 
-with app.app_context():
-    db.create_all()
 
-    user1 = UserRegisterEntity(
-        username="user1", email="user1@gmail.com", password="1234"
-    )
-    user2 = UserRegisterEntity(
-        username="user2", email="user2@gmail.com", password="1234"
-    )
+def create_users():
+    with app.app_context():
+        db.create_all()
 
-    u1 = models.User(**user1.dict())
-    u2 = models.User(**user2.dict())
+        users = []
+        for i in range(1, 5):
+            user = UserRegisterEntity(
+                username=f"u{i}", email=f"user{i}@gmail.com", password="1234"
+            )
+            users.append(models.User(**user.dict()))
 
-    db.session.add_all([u1, u2])
-    db.session.commit()
-    exit()
+        db.session.add_all(users)
+        db.session.commit()
 
-    r = models.Request(sender=u1, receiver=u2)
-    db.session.add(r)
-    db.session.commit()
+        r = models.Request(sender=users[0], receiver=users[1])
+        db.session.add(r)
+        db.session.commit()
+
+        room = models.Room()
+        room.users.append(users[0])
+        room.users.append(users[1])
+        db.session.add(room)
+        db.session.commit()
+
+
+create_users()
