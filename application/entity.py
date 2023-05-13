@@ -1,9 +1,8 @@
 from pydantic import BaseModel, validator, ValidationError
 from .auth.utils import encrypt_password
-from typing import TypedDict
 
 
-class UserDict(TypedDict):
+class User(BaseModel):
     id: int
     username: str
     email: str

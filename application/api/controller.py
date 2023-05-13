@@ -8,7 +8,7 @@ api = Blueprint("api", __name__, url_prefix="/api")
 
 @api.route("/approve", methods=["POST"])
 @token_valid
-def add_friend(user_id: int):
+def approve_request(user_id: int):
     if (request_id := request.args.get("request_id", type=int)) is None:
         raise InvalidRequestException("no query parameter `request_id`")
 
@@ -50,20 +50,27 @@ def get_requests(user_id: int):
 @api.route("/search", methods=["GET"])
 @token_valid
 def search(user_id: int):
-    if (text := request.args.get("search")) is None:
+    if (text := request.args.get("search", type=str)) is None:
         raise InvalidRequestException("no query parameter `search`")
-    results, code = service.search(user_id, text)
+    exclude_friends = request.args.get("exclude_friends", False, type=bool)
+    results, code = service.search(user_id, text, exclude_friends)
     return jsonify(results), code
 
 
 @api.route("/send_message/<string:username>", methods=["POST"])
 @token_valid
 def send_message(user_id: int, username: str):
+    print("aaaa")
     message = request.get_json().get("message", None)
+    print(message)
     if message is None:
         raise InvalidRequestException("Missing body key `message`")
+    print(message)
     result, code = service.send_message(user_id, username, message)
     return jsonify(result), code
+
+
+# def get_messages(user_id: int, username: str):
 
 
 @api.route("/friends", methods=["GET"])
@@ -71,3 +78,10 @@ def send_message(user_id: int, username: str):
 def get_friends(user_id: int):
     friends, code = service.get_friends(user_id)
     return jsonify(friends), code
+
+
+@api.route("/room/<string:username>")
+@token_valid
+def get_room(user_id: int, username: str):
+    room, code = service.get_room(user_id, username)
+    return jsonify(room), code

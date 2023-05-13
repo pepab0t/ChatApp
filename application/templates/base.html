@@ -5,20 +5,31 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title%} {% endblock%}</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+      integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+      crossorigin="anonymous"
+    ></script>
 </head>
 <body>
     <div>
-        <a href="">home</a>
-        <a href="">requests</a>
         {% if user %}
-        <a href="">logout</a>
+        <a href="{{ url_for('views.home') }}">home</a>
+        <a href="{{ url_for('views.friend_requests') }}">requests</a>
+        <a href="{{ url_for('views.add_friend') }}">add friend</a>
+        <a href="{{ url_for('views.logout') }}">logout</a>
         {% else %}
-        <a href="">login</a>
+        <a href="{{ url_for('views.login') }}">login</a>
         {% endif %}
     </div>
+    {% if user %}
+    <p>logged as: {{user.username}}</p>
+    {% endif %}
 
     {% block body %}
     {% endblock%}
-    
+
+    {% block script%}
+    {% endblock%}
 </body>
 </html>

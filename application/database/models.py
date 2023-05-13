@@ -10,6 +10,12 @@ friends = db.Table(
     # db.UniqueConstraint("user_id", "friend_id", name="friends"),
 )
 
+user_room = db.Table(
+    "user_room",
+    db.Column("room_id", db.Integer, db.ForeignKey("room.id", ondelete="CASCADE")),
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id", ondelete="CASCADE")),
+)
+
 
 class User(db.Model):
     __tablename__ = "user"
@@ -105,3 +111,14 @@ class Message(db.Model):
             "text": self.text,
             "timestamp": self.timestamp,
         }
+
+
+class Room(db.Model):
+    __tablename__ = "room"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    users = db.relationship("User", secondary=user_room, backref="rooms")
+
+    def get_name(self):
+        return f"R{self.id}"

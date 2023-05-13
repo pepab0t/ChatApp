@@ -72,11 +72,21 @@ def remove_friend(user_id: int, username: str):
     repository.remove_friends(user1, user2)
 
 
-def search(user_id: int, text: str):
+def search(user_id: int, text: str, exclude_friends: bool):
+    if text == "":
+        return [], 200
     user = repository.get_user_by_id(user_id)
     text = f"%{text}%"
-    users = repository.get_users_by_text(text)
-    users.remove(user)
+
+    if exclude_friends:
+        users = repository.get_users_by_text_exlude_friends(user, text)
+    else:
+        users = repository.get_users_by_text(text)
+
+    try:
+        users.remove(user)
+    except ValueError:
+        pass
     return [u.dict() for u in users], 200
 
 
@@ -84,9 +94,9 @@ def send_message(user_id: int, username: str, text: str):
     if text == "":
         raise InvalidRequestException("Message cannot be empty")
     if (sender := repository.get_user_by_id(user_id)) is None:
-        raise EntityNotFound(f"Request ID `{user_id}` not found")
+        raise EntityNotFound(f"User ID `{user_id}` not found")
     if (receiver := repository.get_user_by_username(username)) is None:
-        raise EntityNotFound(f"Request ID `{username}` not found")
+        raise EntityNotFound(f"User `{username}` not found")
 
     if not already_friends(sender, receiver):
         raise InvalidRequestException("Users are not friends")
@@ -98,3 +108,16 @@ def send_message(user_id: int, username: str, text: str):
 def get_friends(user_id: int):
     user = repository.get_user_by_id(user_id)
     return [friend.dict() for friend in user.friends], 200
+
+
+def get_room(user_id: int, username: str):
+    if (user1 := repository.get_user_by_id(user_id)) is None:
+        raise EntityNotFound(f"User ID `{user_id}` not found")
+    if (user2 := repository.get_user_by_username(username)) is None:
+        raise EntityNotFound(f"User `{username}` not found")
+
+    if not already_friends(user1, user2):
+        raise InvalidRequestException("Users are not friends")
+
+    room = repository.get_room(user1, user2)
+    return {"room": room.get_name()}, 200

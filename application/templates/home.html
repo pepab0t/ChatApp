@@ -1,0 +1,18 @@
+{% extends 'base.html'%}
+
+{% block title%}
+Home
+{% endblock %}
+
+{% block body%}
+
+<h1>Home page</h1>
+<div>
+    <ul>
+        {% for friend in friends %}
+        <li> <a href="{{ url_for('views.open_chat', username=friend['username']) }}">{{friend['username']}}</a> </li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

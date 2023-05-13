@@ -37,4 +37,7 @@ def login(auth):
     if not utils.validate_password(user.password, user_db.password):
         raise Unauthenticated()
 
-    return {"token": utils.create_jwt(user_db.id, user_db.username)}, 200
+    return {
+        "token": utils.create_jwt(user_db.id, user_db.username),
+        "user": user_db.dict(),
+    }, 200

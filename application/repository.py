@@ -1,4 +1,4 @@
-from .database.models import User, Request, Message
+from .database.models import User, Request, Message, Room
 from .database import db
 from .exceptions import DatabaseError
 from sqlalchemy.exc import IntegrityError
@@ -24,6 +24,7 @@ def add_friends(request: Request):
     request.receiver.friends.append(request.sender)
     request.accepted = True
     db.session.commit()
+    return request
 
 
 def decline_request(request: Request):
@@ -86,9 +87,42 @@ def get_users_by_text(text: str):
     return User.query.filter(User.username.like(text)).order_by(User.username).all()
 
 
+def get_users_by_text_exlude_friends(user: User, text: str):
+    user.requests_sent
+
+    return (
+        User.query.filter(User.username.like(text))
+        .filter(
+            ~User.friends.any(User.id == user.id),
+            ~User.requests_received.any(Request.sender_id == user.id),
+        )
+        .order_by(User.username)
+        .all()
+    )
+
+
 def create_message(sender: User, receiver: User, text: str):
     message = Message(sender=sender, receiver=receiver, text=text)
     db.session.add(message)
     db.session.commit()
     db.session.refresh(message)
     return message
+
+
+def get_room(user1: User, user2: User):
+    room = (
+        Room.query.filter(Room.users.any(User.id == user1.id))
+        .filter(Room.users.any(User.id == user1.id))
+        .first()
+    )
+
+    if room is not None:
+        return room
+
+    room = Room()
+    room.users.append(user1)
+    room.users.append(user2)
+    db.session.add(room)
+    db.session.commit()
+    db.refresh(room)
+    return room
