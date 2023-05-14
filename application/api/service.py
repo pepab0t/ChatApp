@@ -121,3 +121,12 @@ def get_room(user_id: int, username: str):
 
     room = repository.get_room(user1, user2)
     return {"room": room.get_name()}, 200
+
+
+def get_messages(user_id: int, friend_username: str):
+    if (user := repository.get_user_by_id(user_id)) is None:
+        raise EntityNotFound(f"User ID `{user_id}` not found")
+    if (friend := repository.get_user_by_username(friend_username)) is None:
+        raise EntityNotFound(f"User `{friend_username}` not found")
+
+    return list(map(lambda m: m.dict(), repository.get_messages(user, friend))), 200

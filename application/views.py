@@ -9,7 +9,7 @@ views = Blueprint("views", __name__)
 
 
 def get_url(endpoint: str, **path_params):
-    return f"http://localhost:5000{url_for(endpoint, **path_params)}"
+    return f"http://192.168.0.31:5000{url_for(endpoint, **path_params)}"
 
 
 def redirect_login():

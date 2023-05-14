@@ -61,4 +61,16 @@ Chat
     message_form.onsubmit = sendMessage;
 
 </script>
+
+<script>
+    fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}"), {
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => data.forEach(message => createMessage(message.sender, message.text)))
+    .catch(error => console.log(error))
+</script>
+
 {% endblock %}

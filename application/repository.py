@@ -112,7 +112,7 @@ def create_message(sender: User, receiver: User, text: str):
 def get_room(user1: User, user2: User):
     room = (
         Room.query.filter(Room.users.any(User.id == user1.id))
-        .filter(Room.users.any(User.id == user1.id))
+        .filter(Room.users.any(User.id == user2.id))
         .first()
     )
 
@@ -126,3 +126,24 @@ def get_room(user1: User, user2: User):
     db.session.commit()
     db.refresh(room)
     return room
+
+
+def get_messages(user: User, friend: User):
+    messages = (
+        Message.query.filter(
+            or_(
+                Message.sender.has(id=user.id),
+                Message.sender.has(id=friend.id),
+            )
+        )
+        .filter(
+            or_(
+                Message.receiver.has(id=user.id),
+                Message.receiver.has(id=friend.id),
+            )
+        )
+        .order_by(Message.timestamp)
+        .all()
+    )
+
+    return messages

@@ -80,8 +80,15 @@ def get_friends(user_id: int):
     return jsonify(friends), code
 
 
-@api.route("/room/<string:username>")
+@api.get("/room/<string:username>")
 @token_valid
 def get_room(user_id: int, username: str):
     room, code = service.get_room(user_id, username)
     return jsonify(room), code
+
+
+@api.get("/messages/<string:username>")
+@token_valid
+def get_messages(user_id: int, username: str):
+    messages, code = service.get_messages(user_id, username)
+    return jsonify(messages), code

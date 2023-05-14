@@ -21,6 +21,21 @@ def create_users():
             )
             users.append(models.User(**user.dict()))
 
+        users.append(
+            models.User(
+                **UserRegisterEntity(
+                    username="pepa", email="pepa@gmail.com", password="1234"
+                ).dict()
+            )
+        )
+        users.append(
+            models.User(
+                **UserRegisterEntity(
+                    username="patty", email="patty@gmail.com", password="1234"
+                ).dict()
+            )
+        )
+
         db.session.add_all(users)
         db.session.commit()
 
