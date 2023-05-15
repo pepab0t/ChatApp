@@ -13,10 +13,9 @@ from .error_handlers import (
 def create_app():
     app = Flask(__name__)
     app.config["SESSION_TYPE"] = "cookie"
-    # app.config["SECRET_KEY"] = get_key(".env", "APP_SECRET_KEY")
-    app.secret_key = get_key(".env", "APP_SECRET_KEY")
+    app.config["SECRET_KEY"] = get_key(".env", "APP_SECRET_KEY")
+    app.config["JWT_SECRET_KEY"] = get_key(".evn", "APP_JWT_SECRET")
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
-    # app.config["SESSION_COOKIE_HTTPONLY"] = False
 
     db.init_app(app)
 
