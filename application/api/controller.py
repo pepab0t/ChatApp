@@ -60,12 +60,9 @@ def search(user_id: int):
 @api.route("/send_message/<string:username>", methods=["POST"])
 @token_valid
 def send_message(user_id: int, username: str):
-    print("aaaa")
     message = request.get_json().get("message", None)
-    print(message)
     if message is None:
         raise InvalidRequestException("Missing body key `message`")
-    print(message)
     result, code = service.send_message(user_id, username, message)
     return jsonify(result), code
 

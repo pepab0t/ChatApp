@@ -1,7 +1,7 @@
 from ..exceptions import InvalidRequestException, EntityNotFound, Unauthenticated
 from ..entity import UserLoginEntity, UserRegisterEntity, ValidationError
 from . import utils
-
+from flask_jwt_extended import create_access_token
 from .. import repository
 
 
@@ -10,7 +10,7 @@ def prepare_validation_error(err: ValidationError):
     return InvalidRequestException(f"{errors['loc'][0]}: {errors['msg']}", 422)
 
 
-def register(body: dict[str, str]):
+def register(body):
     if not body:
         raise InvalidRequestException("Empty body not accepted", 400)
 
@@ -39,5 +39,6 @@ def login(auth):
 
     return {
         "token": utils.create_jwt(user_db.id, user_db.username),
-        "user": user_db.dict(),
+        # "user": user_db.dict(),
     }, 200
+    return create_access_token(identity=user.username), 200

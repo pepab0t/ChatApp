@@ -1,13 +1,9 @@
 from flask import Blueprint, request, abort, jsonify
 from . import service
 from ..entity import UserRegisterEntity
+from flask_jwt_extended import set_access_cookies, unset_jwt_cookies
 
 auth = Blueprint("auth", __name__, url_prefix="/auth")
-
-
-@auth.route("/hello", methods=["GET"])
-def hello():
-    return "Hello world"
 
 
 @auth.route("/register", methods=["POST"])
@@ -20,4 +16,13 @@ def register():
 def login():
     auth = request.authorization
     token, code = service.login(auth)
-    return jsonify(token), code
+    response = jsonify(token)
+    # set_access_cookies(response, token)
+    return response, code
+
+
+@auth.post("/logout")
+def logout():
+    response = jsonify({"message": "logout successfull"})
+    unset_jwt_cookies(response)
+    return response, 200

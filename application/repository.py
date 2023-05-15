@@ -124,7 +124,7 @@ def get_room(user1: User, user2: User):
     room.users.append(user2)
     db.session.add(room)
     db.session.commit()
-    db.refresh(room)
+    db.session.refresh(room)
     return room
 
 

@@ -26,7 +26,7 @@ Login
             request_id: rid
         }), {
             headers: {
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${getCookie('access_token')}`
             },
             method: "POST"
         })
@@ -42,7 +42,7 @@ Login
             request_id: rid
         }), {
             headers: {
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${getCookie('access_token')}`
             },
             method: "POST"
         })

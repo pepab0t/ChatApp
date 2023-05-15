@@ -1,42 +1,54 @@
-from flask import Blueprint, render_template, url_for, request, redirect, session
+from flask import Blueprint, render_template, url_for, request, redirect, make_response
 import requests
 import base64
 from functools import wraps
-from .entity import User
-
+from flask_socketio import join_room
+from .auth.utils import decode_jwt
+from . import repository
 
 views = Blueprint("views", __name__)
 
 
 def get_url(endpoint: str, **path_params):
-    return f"http://192.168.0.31:5000{url_for(endpoint, **path_params)}"
+    return f"http://localhost:5000{url_for(endpoint, **path_params)}"
 
 
 def redirect_login():
     return redirect(get_url("views.login"))
 
 
-def create_user():
-    if (user_dict := session.get("user")) is None:
+def response_with_token(response, token: str):
+    r = make_response(response)
+    r.set_cookie("access_token", token)
+    return r
+
+
+# @jwt.user_lookup_loader
+# def user_lookup_callback(_jwt_header, jwt_data):
+#     username = jwt_data["username"]
+#     return repository.get_user_by_username(username)
+def current_user(token: str):
+    try:
+        payload = decode_jwt(token)
+        username = payload["user"]
+    except Exception:
         return None
-    return User(**user_dict)
+
+    return repository.get_user_by_username(username)
 
 
-def token_required(fn):
+def parse_token(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        token = session.get("token", None)
-        if token is None:
-            return redirect_login()
+        token = request.cookies.get("access_token", None)
         return fn(token, *args, **kwargs)
 
     return wrapper
 
 
 @views.get("/")
-@token_required
+@parse_token
 def home(token: str):
-    print("token", session["token"])
     response = requests.get(
         get_url("api.get_friends"), headers={"Authorization": f"Bearer {token}"}
     )
@@ -46,7 +58,9 @@ def home(token: str):
 
     data = response.json()
 
-    return render_template("home.html", user=create_user(), friends=data)
+    print(current_user(token))
+
+    return render_template("home.html", user=current_user(token), friends=data), token
 
 
 @views.route("/login", methods=["GET", "POST"])
@@ -66,23 +80,18 @@ def login():
     if not response.ok:
         return render_template("login.html")
 
-    data = response.json()
-    session["token"] = data["token"]
-    session["user"] = data["user"]
-    print(session["user"])
-
-    return redirect(url_for("views.home"))
+    return response_with_token(
+        redirect(url_for("views.home")), response.json()["token"]
+    )
 
 
-@views.route("/logout", methods=["GET"])
+@views.get("/logout")
 def logout():
-    del session["token"]
-    del session["user"]
-    return redirect_login()
+    return response_with_token(redirect(url_for("views.login")), "")
 
 
 @views.get("/requests")
-@token_required
+@parse_token
 def friend_requests(token: str):
     response = requests.get(
         get_url("api.get_requests"), headers={"Authorization": f"Bearer {token}"}
@@ -93,21 +102,18 @@ def friend_requests(token: str):
 
     data = response.json()
 
-    return render_template("requests.html", user=create_user(), requests=data)
+    return render_template("requests.html", user=current_user(token), requests=data)
 
 
 @views.get("/add_friend")
-@token_required
+@parse_token
 def add_friend(token: str):
-    return render_template("add_friend.html", user=create_user())
+    return render_template("add_friend.html", user=current_user(token))
 
 
 @views.get("/chat/<string:username>")
-@token_required
+@parse_token
 def open_chat(token: str, username: str):
-    # if (username := request.args.get("username", None)) is None:
-    #     return redirect(url_for("views.home"))
-
     response = requests.get(
         get_url("api.get_room", username=username),
         headers={"Authorization": f"Bearer {token}"},
@@ -116,10 +122,9 @@ def open_chat(token: str, username: str):
     if not response.ok:
         return redirect(url_for("views.home"))
 
-    session["room"] = response.json()["room"]
-
     return render_template(
         "chat.html",
-        user=create_user(),
+        user=current_user(token),
         with_user=username,
+        room=response.json()["room"],
     )

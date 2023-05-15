@@ -22,7 +22,7 @@ def create_jwt(id: int, username: str) -> str:
     return jwt.encode(
         {
             "id": id,
-            "username": username,
+            "user": username,
             "exp": datetime.datetime.now(tz=datetime.timezone.utc)
             + datetime.timedelta(hours=5),
         },
