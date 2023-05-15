@@ -9,7 +9,6 @@ Chat
 
 <h1>Chat with {{with_user}}</h1>
 <div id="content">
-    {{room}}
 </div>
 <form id="message_form">
     <input type="text" name="" id="message">
@@ -20,11 +19,19 @@ Chat
 
 {% block script %}
 <script>
-    const token = "{{session['token']}}"
-    var socketio = io({message: "hello"});
+    var socketio = io({query: "hello"});
+
+    socketio.on("connect", function() {
+        socketio.emit("join_room", {room: "{{room}}"})
+    })
+
+    socketio.on("disconnect", function() {
+        socketio.emit("leave_room", {room: "{{room}}"})
+    })
 
     const content = document.getElementById("content")
     const message_form = document.getElementById("message_form")
+    const message_input = document.getElementById("message")
 
     const createMessage = (name, msg) => {
         const message = document.createElement('p');
@@ -43,7 +50,7 @@ Chat
         fetch("{{ get_url('api.send_message', username='__var1__') }}".replace("__var1__", '{{with_user}}'), {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${token}`,
+                "Authorization": `Bearer ${getCookie('access_token')}`,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -51,7 +58,8 @@ Chat
         })
         .then(response => {
             if (response.ok) {
-                socketio.emit("message", {msg: message.value, name: "{{user.username}}"})
+                socketio.emit("message", {msg: message.value, name: "{{user.username}}", room: "{{room}}" })
+                message.value = ""
             }
         })
         .catch(error => console.log("error"))
@@ -65,7 +73,7 @@ Chat
 <script>
     fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}"), {
         headers: {
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${getCookie('access_token')}`
         }
     })
     .then(response => response.json())

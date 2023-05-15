@@ -25,13 +25,12 @@ Login
     const form = document.getElementById('search-form');
     const search_input = document.getElementById('search');
     const ul = document.getElementById("list");
-    const token = "{{session['token']}}";
 
     const sendRequest = function(username){
         
         fetch(`{{ get_url('api.send_request', username='_/temp/_') }}`.replace('_/temp/_', username), {
             headers: {
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${getCookie('access_token')}`
             },
             method: "POST"
         })
@@ -74,7 +73,7 @@ Login
             exclude_friends: true,
         }), {
             headers: {
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${getCookie('access_token')}`
             }
         })
         .then(response => response.json())

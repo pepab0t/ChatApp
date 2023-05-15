@@ -1,6 +1,8 @@
 from flask import Flask, session
+import os
 from flask_socketio import SocketIO, send, join_room, leave_room
-from dotenv import get_key
+from dotenv import load_dotenv
+from .extensions import jwt
 
 from .database import db, DB_NAME
 from .error_handlers import (
@@ -9,15 +11,18 @@ from .error_handlers import (
     handle_entity_404,
 )
 
+load_dotenv()
+
 
 def create_app():
     app = Flask(__name__)
-    app.config["SESSION_TYPE"] = "cookie"
-    app.config["SECRET_KEY"] = get_key(".env", "APP_SECRET_KEY")
-    app.config["JWT_SECRET_KEY"] = get_key(".evn", "APP_JWT_SECRET")
+    app.config["SECRET_KEY"] = os.getenv("APP_SECRET_KEY")
+    app.config["JWT_SECRET_KEY"] = os.getenv("APP_JWT_SECRET")
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
+    app.config["JWT_TOKEN_LOCATION"] = "cookies"
 
     db.init_app(app)
+    jwt.init_app(app)
 
     from .auth.controller import auth
     from .api.controller import api
@@ -40,26 +45,24 @@ def create_socketio():
     app = create_app()
     socket = SocketIO(app, cors_allowed_origins="*")
 
-    @socket.on("connect")
+    @socket.on("join_room")
     def connect(data):
-        room = session.get("room")
+        room = data.get("room")
         if room is None:
             return
-
         join_room(room)
 
-    @socket.on("disconnect")
-    def disconnect():
-        room = session.get("room")
+    @socket.on("leave_room")
+    def disconnect(data):
+        room = data.get("room")
         if room is None:
             return
 
         leave_room(room)
-        del session["room"]
 
     @socket.on("message")
     def message(data):
-        room = session.get("room")
+        room = data.get("room")
         if room is None:
             return
 
