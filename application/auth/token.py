@@ -14,11 +14,10 @@ def arg_available(argname: str, fn):
 def token_valid(fn):
     @wraps(fn)
     def wrapper(*args, **kwds):
-        auth = request.headers.get("Authorization")
-        if auth is None:
+        token = request.cookies.get("access_token")
+        if token is None:
             raise Unauthenticated()
 
-        token = auth.split(" ")[1]
         payload = validate_jwt(token)
 
         if payload is None:

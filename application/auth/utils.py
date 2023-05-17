@@ -24,7 +24,7 @@ def create_jwt(id: int, username: str) -> str:
             "id": id,
             "user": username,
             "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-            + datetime.timedelta(hours=5),
+            + datetime.timedelta(minutes=300),
         },
         SECRET,
         algorithm="HS256",

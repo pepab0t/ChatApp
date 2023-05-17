@@ -50,7 +50,6 @@ Chat
         fetch("{{ get_url('api.send_message', username='__var1__') }}".replace("__var1__", '{{with_user}}'), {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${getCookie('access_token')}`,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -71,11 +70,7 @@ Chat
 </script>
 
 <script>
-    fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}"), {
-        headers: {
-            "Authorization": `Bearer ${getCookie('access_token')}`
-        }
-    })
+    fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}"))
     .then(response => response.json())
     .then(data => data.forEach(message => createMessage(message.sender, message.text)))
     .catch(error => console.log(error))
