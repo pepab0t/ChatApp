@@ -25,9 +25,6 @@ Login
         fetch("{{ get_url('api.approve_request') }}" + "?" + new URLSearchParams({
             request_id: rid
         }), {
-            headers: {
-                "Authorization": `Bearer ${getCookie('access_token')}`
-            },
             method: "POST"
         })
         .then( response => {
@@ -41,9 +38,6 @@ Login
         fetch("{{ get_url('api.decline_request') }}" + "?" + new URLSearchParams({
             request_id: rid
         }), {
-            headers: {
-                "Authorization": `Bearer ${getCookie('access_token')}`
-            },
             method: "POST"
         })
         .then( response => {

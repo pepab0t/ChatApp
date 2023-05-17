@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, url_for, request, redirect, make_r
 import requests
 import base64
 from functools import wraps
-from flask_socketio import join_room
 from .auth.utils import decode_jwt
 from . import repository
 
@@ -17,24 +16,21 @@ def redirect_login():
     return redirect(get_url("views.login"))
 
 
-def response_with_token(response, token: str):
-    r = make_response(response)
-    r.set_cookie("access_token", token)
-    return r
+def current_user(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        token = request.cookies.get("access_token", "")
 
+        try:
+            payload = decode_jwt(token)
+            username = payload["user"]
+        except Exception:
+            current_user = None
+        else:
+            current_user = repository.get_user_by_username(username)
+        return fn(current_user, *args, **kwargs)
 
-# @jwt.user_lookup_loader
-# def user_lookup_callback(_jwt_header, jwt_data):
-#     username = jwt_data["username"]
-#     return repository.get_user_by_username(username)
-def current_user(token: str):
-    try:
-        payload = decode_jwt(token)
-        username = payload["user"]
-    except Exception:
-        return None
-
-    return repository.get_user_by_username(username)
+    return wrapper
 
 
 def parse_token(fn):
@@ -47,20 +43,18 @@ def parse_token(fn):
 
 
 @views.get("/")
-@parse_token
-def home(token: str):
+@current_user
+def home(user):
     response = requests.get(
-        get_url("api.get_friends"), headers={"Authorization": f"Bearer {token}"}
+        get_url("api.get_friends"),
+        cookies={"access_token": request.cookies.get("access_token", "")},
     )
 
     if not response.ok:
         return redirect_login()
 
     data = response.json()
-
-    print(current_user(token))
-
-    return render_template("home.html", user=current_user(token), friends=data), token
+    return render_template("home.html", user=user, friends=data)
 
 
 @views.route("/login", methods=["GET", "POST"])
@@ -80,21 +74,26 @@ def login():
     if not response.ok:
         return render_template("login.html")
 
-    return response_with_token(
-        redirect(url_for("views.home")), response.json()["token"]
-    )
+    token = response.cookies.get("access_token")
+    r = make_response(redirect(url_for("views.home")))
+    r.set_cookie("access_token", token)
+    return r
 
 
 @views.get("/logout")
 def logout():
-    return response_with_token(redirect(url_for("views.login")), "")
+    requests.post(get_url("auth.logout"))
+    response = make_response(redirect_login())
+    # response.delete_cookie("access_token")
+    return response
 
 
 @views.get("/requests")
-@parse_token
-def friend_requests(token: str):
+@current_user
+def friend_requests(user):
     response = requests.get(
-        get_url("api.get_requests"), headers={"Authorization": f"Bearer {token}"}
+        get_url("api.get_requests"),
+        cookies={"access_token": request.cookies.get("access_token", "")},
     )
 
     if not response.ok:
@@ -102,21 +101,21 @@ def friend_requests(token: str):
 
     data = response.json()
 
-    return render_template("requests.html", user=current_user(token), requests=data)
+    return render_template("requests.html", user=user, requests=data)
 
 
 @views.get("/add_friend")
-@parse_token
-def add_friend(token: str):
-    return render_template("add_friend.html", user=current_user(token))
+@current_user
+def add_friend(user):
+    return render_template("add_friend.html", user=user)
 
 
 @views.get("/chat/<string:username>")
-@parse_token
-def open_chat(token: str, username: str):
+@current_user
+def open_chat(user, username: str):
     response = requests.get(
         get_url("api.get_room", username=username),
-        headers={"Authorization": f"Bearer {token}"},
+        cookies={"access_token": request.cookies.get("access_token", "")},
     )
 
     if not response.ok:
@@ -124,7 +123,7 @@ def open_chat(token: str, username: str):
 
     return render_template(
         "chat.html",
-        user=current_user(token),
+        user=user,
         with_user=username,
         room=response.json()["room"],
     )
