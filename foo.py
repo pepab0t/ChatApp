@@ -1,5 +1,13 @@
-from application.auth.token import token_valid
-import inspect
+def decorator(fn):
+    def wrapper(*args, **kwargs):
+        return fn(*args, **kwargs)
 
-args = inspect.getargspec(token_valid)
-print(args)
+    return wrapper
+
+
+@decorator
+def foo(**kwargs):
+    print(kwargs)
+
+
+foo()
