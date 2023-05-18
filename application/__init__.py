@@ -9,6 +9,7 @@ from .error_handlers import (
     handle_invalid_body,
     handle_database_error,
     handle_entity_404,
+    handle_chat_app_exception,
 )
 
 load_dotenv()
@@ -32,6 +33,7 @@ def create_app():
     app.register_blueprint(api)
     app.register_blueprint(views)
 
+    app.register_error_handler(handle_chat_app_exception.exc, handle_chat_app_exception)
     app.register_error_handler(handle_invalid_body.exc, handle_invalid_body)
     app.register_error_handler(handle_database_error.exc, handle_database_error)
     app.register_error_handler(handle_entity_404.exc, handle_entity_404)

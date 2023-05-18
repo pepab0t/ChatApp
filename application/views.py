@@ -23,21 +23,12 @@ def current_user(fn):
 
         try:
             payload = decode_jwt(token)
-            username = payload["user"]
+            user_id = payload["id"]
         except Exception:
             current_user = None
         else:
-            current_user = repository.get_user_by_username(username)
+            current_user = repository.get_user_by_id(user_id)
         return fn(current_user, *args, **kwargs)
-
-    return wrapper
-
-
-def parse_token(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        token = request.cookies.get("access_token", None)
-        return fn(token, *args, **kwargs)
 
     return wrapper
 
@@ -74,7 +65,41 @@ def login():
     if not response.ok:
         return render_template("login.html")
 
-    token = response.cookies.get("access_token")
+    token = response.json().get("access_token", "")
+    r = make_response(redirect(url_for("views.home")))
+    r.set_cookie("access_token", token)
+    return r
+
+
+@views.route("/register", methods=["POST", "GET"])
+def register():
+    if request.method == "GET":
+        return render_template("register.html")
+
+    username = request.form.get("username")
+    email = request.form.get("email")
+    password = request.form.get("password")
+    if any(map(lambda x: x is None, [username, email, password])):
+        return render_template("register.html")
+
+    response = requests.post(
+        get_url("auth.register"),
+        json={"username": username, "email": email, "password": password},
+    )
+
+    if not response.ok:
+        return render_template("register.html")
+
+    user = response.json()
+
+    auth = (
+        "Basic " + base64.b64encode(f"{user['username']}:{password}".encode()).decode()
+    )
+    response = requests.post(get_url("auth.login"), headers={"Authorization": auth})
+    if not response.ok:
+        return render_template("login.html")
+
+    token = response.json()
     r = make_response(redirect(url_for("views.home")))
     r.set_cookie("access_token", token)
     return r
@@ -82,9 +107,8 @@ def login():
 
 @views.get("/logout")
 def logout():
-    requests.post(get_url("auth.logout"))
     response = make_response(redirect_login())
-    # response.delete_cookie("access_token")
+    response.delete_cookie("access_token")
     return response
 
 

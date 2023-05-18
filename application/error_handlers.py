@@ -1,5 +1,11 @@
 from typing import Any
-from .exceptions import InvalidRequestException, DatabaseError, EntityNotFound
+from .exceptions import (
+    InvalidRequestException,
+    DatabaseError,
+    EntityNotFound,
+    ChatAppException,
+    Unauthenticated,
+)
 from flask import jsonify
 from functools import wraps
 from typing import Type
@@ -12,6 +18,15 @@ class _associate_exception:
     def __call__(self, fn) -> Any:
         fn.exc = self.exc
         return fn
+
+
+@_associate_exception(ChatAppException)
+def handle_chat_app_exception(exc: ChatAppException):
+    """handle InvalidFormException"""
+    return (
+        jsonify({"message": exc.message, "error": exc.__class__.__name__}),
+        exc.status_code,
+    )
 
 
 @_associate_exception(InvalidRequestException)

@@ -1,50 +1,75 @@
 import jwt
+import os
 import bcrypt
 import datetime
 from dotenv import get_key
 from typing import TypedDict
 from functools import partial
+from ..exceptions import InvalidJWT, ExpiredJWT, TolerableExpiredJWT
 
 SALT: bytes = bcrypt.gensalt()
 hashpw = partial(bcrypt.hashpw, salt=SALT)
 
 SECRET = get_key(".env", "APP_JWT_SECRET")
+ACCESS_TOKEN_DURATION_MINS = float(os.getenv("ACCESS_TOKEN_DURATION_MINS"))  # type: ignore
+ACCESS_TOKEN_TOLERANCE_MINS = float(os.getenv("ACCESS_TOKEN_TOLERANCE_MINS"))  # type: ignore
+REFRESH_TOKEN_DURATION_HOURS = float(os.getenv("REFRESH_TOKEN_DURATION_HOURS"))  # type: ignore
 assert SECRET is not None, "Unable to read APP_JWT_SECRET env variable"
 
 
 class JWTEntity(TypedDict):
     id: int
-    username: str
     exp: float
 
 
-def create_jwt(id: int, username: str) -> str:
+def _create_jwt(id: int, **timedelta_params) -> str:
     return jwt.encode(
         {
             "id": id,
-            "user": username,
             "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-            + datetime.timedelta(minutes=300),
+            + datetime.timedelta(**timedelta_params),
         },
         SECRET,
         algorithm="HS256",
     )
 
 
+create_access_token = partial(_create_jwt, minutes=ACCESS_TOKEN_DURATION_MINS)
+create_refresh_token = partial(_create_jwt, hours=REFRESH_TOKEN_DURATION_HOURS)
+
+
 def decode_jwt(encoded_jwt: str):
     return jwt.decode(encoded_jwt, SECRET, ["HS256"])
 
 
-def validate_jwt(encoded_jwt: str) -> JWTEntity | None:
+def validate_jwt(encoded_jwt: str) -> JWTEntity:
+    """validate a given jwt
+
+    Args:
+        encoded_jwt (str)
+
+    Raises:
+        InvalidJWT: Raised when JWT is not valid
+        TolerableExpiredJWT: Raised when JWT is expired, but within tolerance
+        ExpiredJWT: Raised when JWT is valid, but expired
+
+    Returns:
+        JWTEntity
+    """
     try:
         payload: JWTEntity = decode_jwt(encoded_jwt)  # type: ignore
-    except jwt.PyJWTError:
-        return None
-
-    if datetime.datetime.fromtimestamp(
-        payload["exp"], tz=datetime.timezone.utc
-    ) < datetime.datetime.now(tz=datetime.timezone.utc):
-        return None
+    except jwt.DecodeError:
+        raise InvalidJWT()
+    except jwt.ExpiredSignatureError:
+        # if token is expired, try if expired within tolerance
+        try:
+            jwt.decode(encoded_jwt, SECRET, ["HS256"], leeway=datetime.timedelta(minutes=ACCESS_TOKEN_TOLERANCE_MINS))  # type: ignore
+        except jwt.ExpiredSignatureError:
+            # if not in tolerance raise ExpiredJWT
+            raise ExpiredJWT()
+        else:
+            # if in tolerance raise TolerableExpiredJWT
+            raise TolerableExpiredJWT()
 
     return payload
 

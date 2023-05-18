@@ -19,7 +19,7 @@ def register(body):
     except ValidationError as err:
         raise prepare_validation_error(err)
 
-    return repository.register_user(user), 201
+    return repository.register_user(user).dict(), 201
 
 
 def login(auth):
@@ -37,5 +37,11 @@ def login(auth):
     if not utils.validate_password(user.password, user_db.password):
         raise Unauthenticated()
 
-    return utils.create_jwt(user_db.id, user_db.username), 200
-    # return create_access_token(identity=user.username), 200
+    return create_tokens(user_db.id), 200
+
+
+def create_tokens(user_id):
+    return {
+        "access": utils.create_access_token(user_id),
+        "refresh": utils.create_refresh_token(user_id),
+    }
