@@ -1,13 +1,9 @@
-def decorator(fn):
-    def wrapper(*args, **kwargs):
-        return fn(*args, **kwargs)
-
-    return wrapper
-
-
-@decorator
-def foo(**kwargs):
-    print(kwargs)
+def foo():
+    print("open")
+    yield 1
+    print("close")
 
 
-foo()
+g = foo()
+# print(next(g))
+# next(g)

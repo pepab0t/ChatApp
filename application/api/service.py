@@ -18,7 +18,7 @@ def send_request(user_id: int, user_to: str):
         )
 
     if already_friends(user1, user2):
-        raise InvalidRequestException("users are already friends", 400)
+        raise InvalidRequestException("users are already friends")
 
     request = repository.create_request(user1, user2)
     if request is None:

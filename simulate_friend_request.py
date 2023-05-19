@@ -1,11 +1,11 @@
 from application.entity import UserRegisterEntity
 from application.database import db, models
 
-from application import create_app
+from application import create_flask
 
 import os
 
-app = create_app()
+app = create_flask("sqlite:///database.db")
 
 os.system("rm instance/database.db")
 
@@ -15,26 +15,14 @@ def create_users():
         db.create_all()
 
         users = []
-        for i in range(1, 5):
-            user = UserRegisterEntity(
-                username=f"u{i}", email=f"user{i}@gmail.com", password="1234"
-            )
-            users.append(models.User(**user.dict()))
+        u1 = {"username": "user1", "email": "user1@test.com", "password": "1234"}
 
-        users.append(
-            models.User(
-                **UserRegisterEntity(
-                    username="pepa", email="pepa@gmail.com", password="1234"
-                ).dict()
-            )
-        )
-        users.append(
-            models.User(
-                **UserRegisterEntity(
-                    username="patty", email="patty@gmail.com", password="1234"
-                ).dict()
-            )
-        )
+        u2 = {"username": "user2", "email": "user2@test.com", "password": "4567"}
+
+        u3 = {"username": "user3", "email": "user3@test.com", "password": "7895"}
+        users.append(models.User(**UserRegisterEntity(**u1).dict()))
+        users.append(models.User(**UserRegisterEntity(**u2).dict()))
+        users.append(models.User(**UserRegisterEntity(**u3).dict()))
 
         db.session.add_all(users)
         db.session.commit()
