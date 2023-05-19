@@ -38,7 +38,7 @@ create_access_token = partial(_create_jwt, minutes=ACCESS_TOKEN_DURATION_MINS)
 create_refresh_token = partial(_create_jwt, hours=REFRESH_TOKEN_DURATION_HOURS)
 
 
-def decode_jwt(encoded_jwt: str):
+def _decode_jwt(encoded_jwt: str):
     return jwt.decode(encoded_jwt, SECRET, ["HS256"])
 
 
@@ -57,19 +57,19 @@ def validate_jwt(encoded_jwt: str) -> JWTEntity:
         JWTEntity
     """
     try:
-        payload: JWTEntity = decode_jwt(encoded_jwt)  # type: ignore
+        payload: JWTEntity = _decode_jwt(encoded_jwt)  # type: ignore
     except jwt.DecodeError:
         raise InvalidJWT()
     except jwt.ExpiredSignatureError:
         # if token is expired, try if expired within tolerance
         try:
-            jwt.decode(encoded_jwt, SECRET, ["HS256"], leeway=datetime.timedelta(minutes=ACCESS_TOKEN_TOLERANCE_MINS))  # type: ignore
+            payload = jwt.decode(encoded_jwt, SECRET, ["HS256"], leeway=datetime.timedelta(minutes=ACCESS_TOKEN_TOLERANCE_MINS))  # type: ignore
         except jwt.ExpiredSignatureError:
             # if not in tolerance raise ExpiredJWT
             raise ExpiredJWT()
         else:
             # if in tolerance raise TolerableExpiredJWT
-            raise TolerableExpiredJWT()
+            raise TolerableExpiredJWT(payload=payload)
 
     return payload
 

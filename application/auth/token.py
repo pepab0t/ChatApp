@@ -12,6 +12,7 @@ from functools import cache, partial, update_wrapper, wraps
 from typing import Literal
 
 TokenKey = Literal["access_token"] | Literal["refresh_token"]
+TOKEN_FROM = "cookies"
 
 
 @cache
@@ -66,7 +67,7 @@ class token_valid:
         return wrapper
 
     def _without_error(self, fn, *args, **kwds):
-        token = parse_token(self.token_name, get_from="query")
+        token = parse_token(self.token_name, get_from=TOKEN_FROM)
 
         try:
             payload = validate_jwt(token)
@@ -80,12 +81,11 @@ class token_valid:
         return fn(*args, **kwds)
 
     def _with_error(self, fn, *args, **kwds):
-        print("checking access")
         if not arg_available("errors", fn):
             raise AttributeError(
                 f"Function `{fn.__name__}` missing argument `errors`. To avoid this use `@{self.__class__.__name__}(inject_error=False)`"
             )
-        token = parse_token(self.token_name, get_from="query")
+        token = parse_token(self.token_name, get_from=TOKEN_FROM)
         payload = None
         if "errors" not in kwds:
             kwds["errors"] = list()
@@ -94,6 +94,7 @@ class token_valid:
             payload = validate_jwt(token)
         except JWTError as err:
             kwds["errors"].append(err)
+            payload = getattr(err, "payload", None)
 
         if arg_available("user_id", fn):
             if "user_id" not in kwds:

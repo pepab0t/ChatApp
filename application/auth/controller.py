@@ -38,10 +38,16 @@ def refresh(errors: list[ChatAppException], user_id: int):
 
     token = service.create_tokens(user_id)
     response = make_response(
-        jsonify(access_token=token["access"], refresh_token=token["refresh"]), 200
+        jsonify(
+            access_token=token["access"],
+            refresh_token=token["refresh"],
+            user_id=user_id,
+        ),
+        200,
     )
     response.set_cookie("access_token", token["access"], httponly=True)
     response.set_cookie("refresh_token", token["refresh"], httponly=True)
+    print("TOKENS REFRESHED")
     return response
 
 
@@ -52,3 +58,10 @@ def logout():
     response.delete_cookie("access_token", httponly=True)
     response.delete_cookie("refresh_token", httponly=True)
     return response
+
+
+@auth.get("/validate")
+def validate():
+    token = request.get_json().get("token")
+    body, code = service.validate(token)
+    return jsonify(body), code

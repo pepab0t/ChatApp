@@ -1,7 +1,13 @@
-from ..exceptions import InvalidRequestException, EntityNotFound, Unauthenticated
+from ..exceptions import (
+    InvalidRequestException,
+    EntityNotFound,
+    Unauthenticated,
+    InvalidJWT,
+    ExpiredJWT,
+    TolerableExpiredJWT,
+)
 from ..entity import UserLoginEntity, UserRegisterEntity, ValidationError
 from . import utils
-from flask_jwt_extended import create_access_token
 from .. import repository
 
 
@@ -45,3 +51,17 @@ def create_tokens(user_id):
         "access": utils.create_access_token(user_id),
         "refresh": utils.create_refresh_token(user_id),
     }
+
+
+def validate(token: str):
+    body = {}
+    try:
+        body["payload"] = utils.validate_jwt(token)
+    except (InvalidJWT, ExpiredJWT):
+        body["state"] = "false"
+    except TolerableExpiredJWT:
+        body["state"] = "refresh"
+    else:
+        body["state"] = "true"
+
+    return body, 200
