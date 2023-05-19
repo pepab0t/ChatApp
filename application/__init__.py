@@ -2,7 +2,6 @@ from flask import Flask, session
 import os
 from flask_socketio import SocketIO, send, join_room, leave_room
 from dotenv import load_dotenv
-from .extensions import jwt
 
 from .database import db, DB_NAME
 from .error_handlers import (
@@ -23,7 +22,6 @@ def create_app():
     app.config["JWT_TOKEN_LOCATION"] = "cookies"
 
     db.init_app(app)
-    jwt.init_app(app)
 
     from .auth.controller import auth
     from .api.controller import api

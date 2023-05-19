@@ -56,7 +56,9 @@ class ExpiredJWT(JWTError):
 class TolerableExpiredJWT(JWTError):
     def __init__(
         self,
+        payload,
         message: str = "JWT is expired, but within tolerance",
         status_code: int = 401,
     ) -> None:
         super().__init__(message, status_code)
+        self.payload = payload

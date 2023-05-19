@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, url_for, request, redirect, make_r
 import requests
 import base64
 from functools import wraps
-from .auth.utils import decode_jwt
 from . import repository
 
 views = Blueprint("views", __name__)
@@ -16,29 +15,64 @@ def redirect_login():
     return redirect(get_url("views.login"))
 
 
-def current_user(fn):
+def validate_token(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        token = request.cookies.get("access_token", "")
+        token = request.cookies.get("access_token")
+        if token is None:
+            return redirect_login()
 
-        try:
-            payload = decode_jwt(token)
-            user_id = payload["id"]
-        except Exception:
-            current_user = None
-        else:
-            current_user = repository.get_user_by_id(user_id)
-        return fn(current_user, *args, **kwargs)
+        response = requests.get(get_url("auth.validate"), json={"token": token})
+        response = response.json()
+
+        match response["state"]:
+            case "refresh":
+                refresh_response = requests.get(
+                    get_url("auth.refresh"),
+                    cookies={
+                        "access_token": request.cookies.get("access_token", ""),
+                        "refresh_token": request.cookies.get("refresh_token", ""),
+                    },
+                )
+                data = refresh_response.json()
+                if not refresh_response.ok:
+                    print(data)
+                    return redirect_login()
+
+                r = make_response(
+                    fn(
+                        data["access_token"],
+                        current_user(data["user_id"]),
+                        *args,
+                        **kwargs,
+                    ),
+                )
+                r.set_cookie("access_token", data["access_token"])
+                r.set_cookie("refresh_token", data["refresh_token"])
+                return r
+
+            case "true":
+                return fn(
+                    token, current_user(response["payload"]["id"]), *args, **kwargs
+                )
+            case "false":
+                return redirect_login()
+            case _:
+                return redirect_login()
 
     return wrapper
 
 
+def current_user(user_id: int):
+    return repository.get_user_by_id(user_id)
+
+
 @views.get("/")
-@current_user
-def home(user):
+@validate_token
+def home(token, user):
     response = requests.get(
         get_url("api.get_friends"),
-        cookies={"access_token": request.cookies.get("access_token", "")},
+        cookies={"access_token": token},
     )
 
     if not response.ok:
@@ -65,9 +99,12 @@ def login():
     if not response.ok:
         return render_template("login.html")
 
-    token = response.json().get("access_token", "")
+    data = response.json()
+    access_token = data.get("access_token", "")
+    refresh_token = data.get("refresh_token", "")
     r = make_response(redirect(url_for("views.home")))
-    r.set_cookie("access_token", token)
+    r.set_cookie("access_token", access_token)
+    r.set_cookie("refresh_token", refresh_token)
     return r
 
 
@@ -113,11 +150,11 @@ def logout():
 
 
 @views.get("/requests")
-@current_user
-def friend_requests(user):
+@validate_token
+def friend_requests(token, user):
     response = requests.get(
         get_url("api.get_requests"),
-        cookies={"access_token": request.cookies.get("access_token", "")},
+        cookies={"access_token": token},
     )
 
     if not response.ok:
@@ -129,17 +166,17 @@ def friend_requests(user):
 
 
 @views.get("/add_friend")
-@current_user
-def add_friend(user):
+@validate_token
+def add_friend(token, user):
     return render_template("add_friend.html", user=user)
 
 
 @views.get("/chat/<string:username>")
-@current_user
-def open_chat(user, username: str):
+@validate_token
+def open_chat(token, user, username: str):
     response = requests.get(
         get_url("api.get_room", username=username),
-        cookies={"access_token": request.cookies.get("access_token", "")},
+        cookies={"access_token": token},
     )
 
     if not response.ok:
