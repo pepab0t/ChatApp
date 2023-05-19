@@ -88,8 +88,6 @@ def get_users_by_text(text: str):
 
 
 def get_users_by_text_exlude_friends(user: User, text: str):
-    user.requests_sent
-
     return (
         User.query.filter(User.username.like(text))
         .filter(

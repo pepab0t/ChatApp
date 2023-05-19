@@ -7,6 +7,13 @@ from . import service
 api = Blueprint("api", __name__, url_prefix="/api")
 
 
+@api.route("/send_request/<string:username>", methods=["POST"])
+@token_valid()
+def send_request(user_id: int, username: str):
+    r, code = service.send_request(user_id, username)
+    return jsonify(r), code
+
+
 @api.route("/approve", methods=["POST"])
 @token_valid()
 def approve_request(user_id: int):
@@ -27,25 +34,18 @@ def decline_request(user_id: int):
     return jsonify(req), code
 
 
-@api.route("/delete_friend/<string:username>", methods=["DELETE"])
-@token_valid()
-def remove_friend(user_id: int, username: str):
-    service.remove_friend(user_id, username)
-    return jsonify({"message": "success"}), 204
-
-
-@api.route("/send_request/<string:username>", methods=["POST"])
-@token_valid()
-def send_request(user_id: int, username: str):
-    r, code = service.send_request(user_id, username)
-    return jsonify(r), code
-
-
 @api.route("/requests", methods=["GET"])
 @token_valid()
 def get_requests(user_id: int):
     requests = service.get_all_pending_requests_received(user_id)
     return jsonify(requests), 200
+
+
+@api.route("/delete_friend/<string:username>", methods=["DELETE"])
+@token_valid()
+def remove_friend(user_id: int, username: str):
+    service.remove_friend(user_id, username)
+    return jsonify({"message": "success"}), 204
 
 
 @api.route("/search", methods=["GET"])

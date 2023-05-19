@@ -1,7 +1,9 @@
-from flask import Flask, session
+from flask import Flask
 import os
 from flask_socketio import SocketIO, send, join_room, leave_room
 from dotenv import load_dotenv
+
+load_dotenv()
 
 from .database import db, DB_NAME
 from .error_handlers import (
@@ -11,14 +13,12 @@ from .error_handlers import (
     handle_chat_app_exception,
 )
 
-load_dotenv()
 
-
-def create_app():
+def create_flask(db_uri: str):
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.getenv("APP_SECRET_KEY")
     app.config["JWT_SECRET_KEY"] = os.getenv("APP_JWT_SECRET")
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
     app.config["JWT_TOKEN_LOCATION"] = "cookies"
 
     db.init_app(app)
@@ -41,8 +41,8 @@ def create_app():
     return app
 
 
-def create_socketio():
-    app = create_app()
+def create_app(db_uri):
+    app = create_flask(db_uri)
     socket = SocketIO(app, cors_allowed_origins="*")
 
     @socket.on("join_room")
@@ -57,7 +57,6 @@ def create_socketio():
         room = data.get("room")
         if room is None:
             return
-
         leave_room(room)
 
     @socket.on("message")
@@ -65,7 +64,6 @@ def create_socketio():
         room = data.get("room")
         if room is None:
             return
-
         send(data, to=room)
 
     return socket, app
