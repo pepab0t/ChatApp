@@ -5,3 +5,4 @@ instance/
 **/__pycache__
 .coverage
 htmlcov/
+/tests2
