@@ -1,7 +1,14 @@
-from flask import Blueprint, render_template, url_for, request, redirect, make_response
+from flask import (
+    Blueprint,
+    render_template,
+    url_for,
+    request,
+    redirect,
+    make_response,
+    session,
+)
 import requests
 import base64
-from functools import wraps
 from . import repository
 
 views = Blueprint("views", __name__)
@@ -15,71 +22,28 @@ def redirect_login():
     return redirect(get_url("views.login"))
 
 
-def validate_token(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        token = request.cookies.get("access_token")
-        if token is None:
-            return redirect_login()
-
-        response = requests.get(get_url("auth.validate"), json={"token": token})
-        response = response.json()
-
-        match response["state"]:
-            case "refresh":
-                refresh_response = requests.get(
-                    get_url("auth.refresh"),
-                    cookies={
-                        "access_token": request.cookies.get("access_token", ""),
-                        "refresh_token": request.cookies.get("refresh_token", ""),
-                    },
-                )
-                data = refresh_response.json()
-                if not refresh_response.ok:
-                    print(data)
-                    return redirect_login()
-
-                r = make_response(
-                    fn(
-                        data["access_token"],
-                        current_user(data["user_id"]),
-                        *args,
-                        **kwargs,
-                    ),
-                )
-                r.set_cookie("access_token", data["access_token"])
-                r.set_cookie("refresh_token", data["refresh_token"])
-                return r
-
-            case "true":
-                return fn(
-                    token, current_user(response["payload"]["id"]), *args, **kwargs
-                )
-            case "false":
-                return redirect_login()
-            case _:
-                return redirect_login()
-
-    return wrapper
+def current_user():
+    return repository.get_user_by_id(session.get("user_id", -1))
 
 
-def current_user(user_id: int):
-    return repository.get_user_by_id(user_id)
+def set_cookies(response, cookies) -> None:
+    for k, v in cookies.items():
+        response.set_cookie(k, v, httponly=True)
 
 
 @views.get("/")
-@validate_token
-def home(token, user):
+def home():
     response = requests.get(
         get_url("api.get_friends"),
-        cookies={"access_token": token},
+        cookies=request.cookies,
     )
-
     if not response.ok:
         return redirect_login()
 
     data = response.json()
-    return render_template("home.html", user=user, friends=data)
+    r = make_response(render_template("home.html", user=current_user(), friends=data))
+    set_cookies(r, response.cookies)
+    return r
 
 
 @views.route("/login", methods=["GET", "POST"])
@@ -100,11 +64,16 @@ def login():
         return render_template("login.html")
 
     data = response.json()
-    access_token = data.get("access_token", "")
-    refresh_token = data.get("refresh_token", "")
+    session["user_id"] = data["id"]
+
     r = make_response(redirect(url_for("views.home")))
-    r.set_cookie("access_token", access_token)
-    r.set_cookie("refresh_token", refresh_token)
+    set_cookies(
+        r,
+        {
+            "access_token": data.get("access", ""),
+            "refresh_token": data.get("refresh", ""),
+        },
+    )
     return r
 
 
@@ -138,7 +107,13 @@ def register():
 
     token = response.json()
     r = make_response(redirect(url_for("views.home")))
-    r.set_cookie("access_token", token)
+    set_cookies(
+        r,
+        {
+            "access_token": token.get("access", ""),
+            "refresh_token": token.get("refresh", ""),
+        },
+    )
     return r
 
 
@@ -146,45 +121,55 @@ def register():
 def logout():
     response = make_response(redirect_login())
     response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+    del session["user_id"]
     return response
 
 
 @views.get("/requests")
-@validate_token
-def friend_requests(token, user):
+def friend_requests():
     response = requests.get(
         get_url("api.get_requests"),
-        cookies={"access_token": token},
+        cookies=request.cookies,
     )
-
     if not response.ok:
         return redirect_login()
 
     data = response.json()
-
-    return render_template("requests.html", user=user, requests=data)
+    r = make_response(
+        render_template("requests.html", user=current_user(), requests=data)
+    )
+    set_cookies(r, response.cookies)
+    return r
 
 
 @views.get("/add_friend")
-@validate_token
-def add_friend(token, user):
-    return render_template("add_friend.html", user=user)
+def add_friend():
+    response = requests.get(get_url("api.test"), cookies=request.cookies)
+    if not response.ok:
+        return redirect_login()
+    r = make_response(render_template("add_friend.html", user=current_user()))
+    set_cookies(r, response.cookies)
+    return r
 
 
 @views.get("/chat/<string:username>")
-@validate_token
-def open_chat(token, user, username: str):
+def open_chat(username: str):
     response = requests.get(
         get_url("api.get_room", username=username),
-        cookies={"access_token": token},
+        cookies=request.cookies,
     )
-
     if not response.ok:
         return redirect(url_for("views.home"))
 
-    return render_template(
-        "chat.html",
-        user=user,
-        with_user=username,
-        room=response.json()["room"],
+    r = make_response(
+        render_template(
+            "chat.html",
+            user=current_user(),
+            with_user=username,
+            room=response.json()["room"],
+        )
     )
+
+    set_cookies(r, response.cookies)
+    return r

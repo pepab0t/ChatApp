@@ -43,13 +43,15 @@ def login(auth):
     if not utils.validate_password(user.password, user_db.password):
         raise Unauthenticated()
 
-    return create_tokens(user_db.id), 200
+    payload = create_tokens(user_db.id)
+    return payload, 200
 
 
 def create_tokens(user_id):
     return {
         "access": utils.create_access_token(user_id),
         "refresh": utils.create_refresh_token(user_id),
+        "id": user_id,
     }
 
 

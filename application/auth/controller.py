@@ -15,40 +15,38 @@ def register():
 @auth.route("/login", methods=["POST"])
 def login():
     auth = request.authorization
-    token, code = service.login(auth)
-    response = make_response(
-        jsonify(access_token=token["access"], refresh_token=token["refresh"]), code
-    )
-    response.set_cookie("access_token", token["access"], httponly=True)
-    response.set_cookie("refresh_token", token["refresh"], httponly=True)
+    payload, code = service.login(auth)
+    response = make_response(jsonify(payload), code)
+    response.set_cookie("access_token", payload["access"], httponly=True)
+    response.set_cookie("refresh_token", payload["refresh"], httponly=True)
     return response
 
 
-@auth.get("/refresh")
-@token_valid(token_name="access_token", inject_error=True)
-@token_valid(token_name="refresh_token")
-def refresh(errors: list[ChatAppException], user_id: int):
-    # allowing refresh only expired tokens
-    if not errors:
-        return jsonify(message="JWT is valid, no need to refresh"), 400
+# @auth.get("/refresh")
+# @token_valid(token_name="access_token", inject_error=True)
+# @token_valid(token_name="refresh_token")
+# def refresh(errors: list[ChatAppException], user_id: int):
+#     # allowing refresh only expired tokens
+#     if not errors:
+#         return jsonify(message="JWT is valid, no need to refresh"), 400
 
-    # first error from access token must be TolarableExpiredJWT
-    if not isinstance(errors[0], TolerableExpiredJWT):
-        raise errors[0]
+#     # first error from access token must be TolarableExpiredJWT
+#     if not isinstance(errors[0], TolerableExpiredJWT):
+#         raise errors[0]
 
-    token = service.create_tokens(user_id)
-    response = make_response(
-        jsonify(
-            access_token=token["access"],
-            refresh_token=token["refresh"],
-            user_id=user_id,
-        ),
-        200,
-    )
-    response.set_cookie("access_token", token["access"], httponly=True)
-    response.set_cookie("refresh_token", token["refresh"], httponly=True)
-    print("TOKENS REFRESHED")
-    return response
+#     token = service.create_tokens(user_id)
+#     response = make_response(
+#         jsonify(
+#             access_token=token["access"],
+#             refresh_token=token["refresh"],
+#             user_id=user_id,
+#         ),
+#         200,
+#     )
+#     response.set_cookie("access_token", token["access"], httponly=True)
+#     response.set_cookie("refresh_token", token["refresh"], httponly=True)
+#     print("TOKENS REFRESHED")
+#     return response
 
 
 # not needed

@@ -19,7 +19,7 @@ Chat
 
 {% block script %}
 <script>
-    var socketio = io({query: "hello"});
+    var socketio = io();
 
     socketio.on("connect", function() {
         socketio.emit("join_room", {room: "{{room}}"})
