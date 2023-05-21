@@ -113,49 +113,32 @@ def test_validate_token_false(auth: AuthAction, client):
 @mock.patch.dict(
     os.environ,
     {
-        "ACCESS_TOKEN_DURATION_MINS": "0",
-        "ACCESS_TOKEN_TOLERANCE_MINS": str(2 / 60),
+        "ACCESS_TOKEN_DURATION_MINS": "-1",
+        "ACCESS_TOKEN_TOLERANCE_MINS": "2",
         "REFRESH_TOKEN_DURATION_HOURS": "1",
     },
 )
 def test_refresh(auth: AuthAction, client):
     res = auth.register_and_login()
     assert auth.code_ok(res.status_code)
-    for k, v in auth.parse_cookies(res).items():
+    cookies = auth.parse_cookies(res)
+    for k, v in cookies.items():
         client.set_cookie(k, v)
 
-    res = client.get("/auth/refresh")
-    assert res.json.get("access_token") is not None
-    assert res.json.get("refresh_token") is not None
-    assert res.json.get("user_id") == 1
+    time.sleep(1)
 
-
-@mock.patch.dict(
-    os.environ,
-    {
-        "ACCESS_TOKEN_DURATION_MINS": "1",
-        "ACCESS_TOKEN_TOLERANCE_MINS": "2",
-        "REFRESH_TOKEN_DURATION_HOURS": "1",
-    },
-)
-def test_refresh_not_needed(auth: AuthAction, client):
-    res = auth.register_and_login()
+    res = client.get("/api/test")
     assert auth.code_ok(res.status_code)
-    for k, v in auth.parse_cookies(res).items():
-        client.set_cookie(k, v)
-
-    res = client.get("/auth/refresh")
-    assert (
-        res.status_code == 400
-        and res.json["message"] == "JWT is valid, no need to refresh"
-    )
+    cookies_after = auth.parse_cookies(res)
+    assert cookies["access_token"] != cookies_after["access_token"]
+    assert cookies["refresh_token"] != cookies_after["refresh_token"]
 
 
 @mock.patch.dict(
     os.environ,
     {
         "ACCESS_TOKEN_DURATION_MINS": "0",
-        "ACCESS_TOKEN_TOLERANCE_MINS": "0",
+        "ACCESS_TOKEN_TOLERANCE_MINS": "1",
         "REFRESH_TOKEN_DURATION_HOURS": "0",
     },
 )
@@ -165,8 +148,8 @@ def test_refresh_invalid(auth: AuthAction, client):
     for k, v in auth.parse_cookies(res).items():
         client.set_cookie(k, v)
 
-    res = client.get("/auth/refresh")
-    assert res.json.get("message") == "Invalid refresh_token"
+    res = client.get("/api/test")
+    assert res.json.get("message") == "Invalid refresh token"
     assert res.status_code == 401
 
 
@@ -185,7 +168,7 @@ def test_refresh_bad_jwt(auth: AuthAction, client):
     client.set_cookie("refresh_token", cookies["refresh_token"])
     client.set_cookie("access_token", "abcd")
 
-    res = client.get("/auth/refresh")
+    res = client.get("/api/test")
     assert res.status_code == 401
 
 

@@ -1,15 +1,16 @@
-from flask import request, url_for
+from flask import request, make_response
 from .utils import validate_jwt
 from ..exceptions import (
     Unauthenticated,
     InvalidJWT,
     ExpiredJWT,
-    JWTError,
     TolerableExpiredJWT,
+    JWTError,
 )
 import inspect
 from functools import cache, partial, update_wrapper, wraps
 from typing import Literal
+from . import service
 
 TokenKey = Literal["access_token"] | Literal["refresh_token"]
 TOKEN_FROM = "cookies"
@@ -38,15 +39,15 @@ def parse_token(
     """
     match get_from:
         case "cookies":
-            token = request.cookies.get(key)
+            token = request.cookies.get(key, "")
         case "query":
-            token = request.args.get(key)
+            token = request.args.get(key, "")
         case "body":
-            token = request.get_json().get(key)
+            token = request.get_json().get(key, "")
         case _:
-            token = None
+            token = ""
 
-    if token is None:
+    if token == "":
         raise Unauthenticated(f"missing {key}")
     return token
 
@@ -55,49 +56,68 @@ class token_valid:
     def __init__(
         self, token_name: TokenKey = "access_token", inject_error: bool = False
     ) -> None:
-        self.token_name: TokenKey = token_name
+        # self.token_name: TokenKey = token_name
         self.inject_error = inject_error
 
     def __call__(self, fn):
-        if self.inject_error:
-            wrapper = partial(self._with_error, fn=fn)
-        else:
-            wrapper = partial(self._without_error, fn=fn)
+        # if self.inject_error:
+        #     wrapper = partial(self._with_error, fn=fn)
+        # else:
+        wrapper = partial(self._without_error, fn=fn)
         wrapper = update_wrapper(wrapper, fn)
         return wrapper
 
     def _without_error(self, fn, *args, **kwds):
-        token = parse_token(self.token_name, get_from=TOKEN_FROM)
+        token = parse_token("access_token", get_from=TOKEN_FROM)
 
-        try:
-            payload = validate_jwt(token)
-        except JWTError as e:
-            raise Unauthenticated(f"Invalid {self.token_name}")
-
-        if arg_available("user_id", fn):
-            if "user_id" not in kwds:
-                kwds["user_id"] = payload["id"] if payload else -1
-            return fn(*args, **kwds)
-        return fn(*args, **kwds)
-
-    def _with_error(self, fn, *args, **kwds):
-        if not arg_available("errors", fn):
-            raise AttributeError(
-                f"Function `{fn.__name__}` missing argument `errors`. To avoid this use `@{self.__class__.__name__}(inject_error=False)`"
-            )
-        token = parse_token(self.token_name, get_from=TOKEN_FROM)
         payload = None
-        if "errors" not in kwds:
-            kwds["errors"] = list()
-
+        tokens = None
         try:
             payload = validate_jwt(token)
-        except JWTError as err:
-            kwds["errors"].append(err)
-            payload = getattr(err, "payload", None)
+        except TolerableExpiredJWT:
+            tokens = self.handle_refresh_create()
+        except JWTError:
+            raise Unauthenticated("Invalid access token")
 
-        if arg_available("user_id", fn):
-            if "user_id" not in kwds:
-                kwds["user_id"] = payload["id"] if payload else -1
-            return fn(*args, **kwds)
-        return fn(*args, **kwds)
+        if arg_available("user_id", fn) and not kwds.get("user_id", False):
+            kwds["user_id"] = payload["id"] if payload else tokens["id"]  # type: ignore
+
+        r = make_response(fn(*args, **kwds))
+
+        if tokens:
+            r.set_cookie("refresh_token", tokens["refresh"])
+            r.set_cookie("access_token", tokens["access"])
+
+        return r
+
+    def handle_refresh_create(self):
+        token = parse_token("refresh_token", get_from=TOKEN_FROM)
+        try:
+            payload = validate_jwt(token)
+        except JWTError:
+            raise Unauthenticated("Invalid refresh token")
+
+        print("REFRESHING TOKENS")
+        return service.create_tokens(payload["id"])
+
+    # def _with_error(self, fn, *args, **kwds):
+    #     if not arg_available("errors", fn):
+    #         raise AttributeError(
+    #             f"Function `{fn.__name__}` missing argument `errors`. To avoid this use `@{self.__class__.__name__}(inject_error=False)`"
+    #         )
+    #     token = parse_token(self.token_name, get_from=TOKEN_FROM)
+    #     payload = None
+    #     if "errors" not in kwds:
+    #         kwds["errors"] = list()
+
+    #     try:
+    #         payload = validate_jwt(token)
+    #     except JWTError as err:
+    #         kwds["errors"].append(err)
+    #         payload = getattr(err, "payload", None)
+
+    #     if arg_available("user_id", fn):
+    #         kwds["user_id"] = kwds.get("user_id", False) or (
+    #             payload["id"] if payload else -1
+    #         )
+    #     return fn(*args, **kwds)

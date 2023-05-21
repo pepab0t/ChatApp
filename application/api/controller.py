@@ -7,6 +7,12 @@ from . import service
 api = Blueprint("api", __name__, url_prefix="/api")
 
 
+@api.get("/test")
+@token_valid()
+def test():
+    return jsonify(message="API is working"), 200
+
+
 @api.route("/send_request/<string:username>", methods=["POST"])
 @token_valid()
 def send_request(user_id: int, username: str):
