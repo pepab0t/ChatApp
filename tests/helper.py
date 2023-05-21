@@ -17,6 +17,14 @@ u2 = {"username": "user2", "email": "user2@test.com", "password": "4567"}
 u3 = {"username": "user3", "email": "user3@test.com", "password": "7895"}
 
 
+def parse_cookies(response):
+    out = {}
+    for c in response.headers.getlist("Set-Cookie"):
+        if (m := re.search(f"([A-Za-z_]+)=(.+?);", c)) is not None:
+            out[m[1]] = m[2]
+    return out
+
+
 class AuthAction:
     def __init__(self, client):
         self.client = client
