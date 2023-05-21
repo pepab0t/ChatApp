@@ -74,8 +74,8 @@ class token_valid:
         tokens = None
         try:
             payload = validate_jwt(token)
-        except TolerableExpiredJWT:
-            tokens = self.handle_refresh_create()
+        except TolerableExpiredJWT as err:
+            tokens = self.handle_refresh_create(err.payload["id"])
         except JWTError:
             raise Unauthenticated("Invalid access token")
 
@@ -90,11 +90,14 @@ class token_valid:
 
         return r
 
-    def handle_refresh_create(self):
+    def handle_refresh_create(self, user_id: int):
         token = parse_token("refresh_token", get_from=TOKEN_FROM)
         try:
             payload = validate_jwt(token)
         except JWTError:
+            raise Unauthenticated("Invalid refresh token")
+
+        if payload["id"] != user_id:
             raise Unauthenticated("Invalid refresh token")
 
         print("REFRESHING TOKENS")
