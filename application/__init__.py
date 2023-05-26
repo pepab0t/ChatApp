@@ -43,7 +43,7 @@ def create_flask(db_uri: str):
 
 def create_app(db_uri):
     app = create_flask(db_uri)
-    socket = SocketIO(app, cors_allowed_origins=["http://127.0.0.1:5500"])
+    socket = SocketIO(app, cors_allowed_origins="*")  # ["http://127.0.0.1:5500"])
 
     @socket.on("join_room")
     def connect(data):

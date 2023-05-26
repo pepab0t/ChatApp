@@ -1,17 +1,12 @@
 import pytest
 from application import create_app, db
-from .helper import AuthAction, DBAction
-import os
+from .helper import AuthAction, DBAction, user1, user2, user3
 
 
 @pytest.fixture(scope="module")
 def app():
     _, app = create_app("sqlite:///")
-    app.config.update(
-        {
-            "TESTING": True,
-        }
-    )
+    app.config["TESTING"] = True
 
     with app.app_context():
         db.create_all()
@@ -31,14 +26,29 @@ def auth(client):
     return AuthAction(client)
 
 
-@pytest.fixture()
-def db_action(app):
-    return DBAction(app)
-
-
 @pytest.fixture(scope="module")
 def login_response(auth):
     return auth.login_fixed()
+
+
+@pytest.fixture(scope="module")
+def login_response_user1(auth: AuthAction):
+    return auth.login_defined_user(user1)
+
+
+@pytest.fixture(scope="module")
+def login_response_user2(auth: AuthAction):
+    return auth.login_defined_user(user2)
+
+
+@pytest.fixture(scope="module")
+def login_response_user3(auth: AuthAction):
+    return auth.login_defined_user(user3)
+
+
+@pytest.fixture()
+def db_action(app):
+    return DBAction(app)
 
 
 @pytest.fixture()
