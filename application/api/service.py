@@ -75,6 +75,7 @@ def remove_friend(user_id: int, username: str):
 def search(user_id: int, text: str, exclude_friends: bool):
     if text == "":
         return [], 200
+
     user = repository.get_user_by_id(user_id)
     text = f"%{text}%"
 

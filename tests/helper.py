@@ -10,11 +10,9 @@ username = "test"
 email = "test@test.com"
 password = "12345"
 
-u1 = {"username": "user1", "email": "user1@test.com", "password": "1234"}
-
-u2 = {"username": "user2", "email": "user2@test.com", "password": "4567"}
-
-u3 = {"username": "user3", "email": "user3@test.com", "password": "7895"}
+user1 = {"username": "user1", "email": "user1@test.com", "password": "1234"}
+user2 = {"username": "user2", "email": "user2@test.com", "password": "1234"}
+user3 = {"username": "user3", "email": "user3@test.com", "password": "1234"}
 
 
 def parse_cookies(response):
@@ -23,6 +21,23 @@ def parse_cookies(response):
         if (m := re.search(f"([A-Za-z_]+)=(.+?);", c)) is not None:
             out[m[1]] = m[2]
     return out
+
+
+def code_ok(status_code: int):
+    return 200 <= status_code <= 299
+
+
+def code_ok_response(response):
+    return 200 <= response.status_code <= 299
+
+
+def set_client_cookies(client, cookies: dict[str, str]):
+    for k, v in cookies.items():
+        client.set_cookie(k, v)
+
+
+def set_client_cookies_from_response(client, response):
+    set_client_cookies(client, parse_cookies(response))
 
 
 class AuthAction:
@@ -38,6 +53,9 @@ class AuthAction:
     def login(self, username: str, password: str) -> TestResponse:
         auth = "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode()
         return self.client.post("/auth/login", headers={"Authorization": auth})
+
+    def login_defined_user(self, user: dict[str, str]):
+        return self.login(user["username"], user["password"])
 
     def register_fixed(self):
         return self.register(username=username, email=email, password=password)
@@ -65,15 +83,6 @@ class AuthAction:
     def code_ok(status_code: int):
         return 200 <= status_code <= 299
 
-    @staticmethod
-    def set_client_cookies(client, cookies: dict[str, str]):
-        for k, v in cookies.items():
-            client.set_cookie(k, v)
-
-    @staticmethod
-    def set_client_cookies_from_response(client, response):
-        AuthAction.set_client_cookies(client, AuthAction.parse_cookies(response))
-
 
 class DBAction:
     def __init__(self, app):
@@ -81,13 +90,8 @@ class DBAction:
 
     def create_sample_users(self):
         with self._app.app_context():
-            # user1 = User(**UserRegisterEntity(**u1).dict())
-            # user2 = User(**UserRegisterEntity(**u2).dict())
-            # user3 = User(**UserRegisterEntity(**u3).dict())
-            # repository.db.session.add_all([user1, user2, user3])
-            # repository.db.session.commit()
-            repository.register_user(UserRegisterEntity(**u1))
+            repository.register_user(UserRegisterEntity(**user1))
             repository.db.session.rollback()
-            repository.register_user(UserRegisterEntity(**u2))
+            repository.register_user(UserRegisterEntity(**user2))
             repository.db.session.rollback()
-            repository.register_user(UserRegisterEntity(**u3))
+            repository.register_user(UserRegisterEntity(**user3))

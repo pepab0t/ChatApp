@@ -17,8 +17,8 @@ def create_users():
         users = []
         pepa = {"username": "pepa", "email": "pepa@test.com", "password": "pepa"}
         u1 = {"username": "user1", "email": "user1@test.com", "password": "1234"}
-        u2 = {"username": "user2", "email": "user2@test.com", "password": "4567"}
-        u3 = {"username": "user3", "email": "user3@test.com", "password": "7895"}
+        u2 = {"username": "user2", "email": "user2@test.com", "password": "1234"}
+        u3 = {"username": "user3", "email": "user3@test.com", "password": "1234"}
         users.append(models.User(**UserRegisterEntity(**pepa).dict()))
         users.append(models.User(**UserRegisterEntity(**u1).dict()))
         users.append(models.User(**UserRegisterEntity(**u2).dict()))

@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+import json
 from flask.wrappers import Response
 from ..auth.token import token_valid
 from ..exceptions import InvalidRequestException
@@ -59,8 +60,10 @@ def remove_friend(user_id: int, username: str):
 def search(user_id: int):
     if (text := request.args.get("search", type=str)) is None:
         raise InvalidRequestException("no query parameter `search`")
-    exclude_friends = request.args.get("exclude_friends", False, type=bool)
-    results, code = service.search(user_id, text, exclude_friends)
+    exclude_friends = request.args.get(
+        "exclude_friends", "", type=lambda x: x.lower() in {"true", "1"}
+    )
+    results, code = service.search(user_id, text, exclude_friends)  # type: ignore
     return jsonify(results), code
 
 

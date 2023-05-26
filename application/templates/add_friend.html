@@ -67,7 +67,7 @@ Login
 
         fetch("{{ get_url('api.search') }}?" + new URLSearchParams({
             search: search_text,
-            exclude_friends: true,
+            exclude_friends: 1,
         }))
         .then(response => {
             console.log(response);

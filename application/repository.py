@@ -92,7 +92,9 @@ def get_users_by_text_exlude_friends(user: User, text: str):
         User.query.filter(User.username.like(text))
         .filter(
             ~User.friends.any(User.id == user.id),
-            ~User.requests_received.any(Request.sender_id == user.id),
+            ~User.requests_received.any(
+                and_(Request.sender_id == user.id, Request.accepted == None)
+            ),
         )
         .order_by(User.username)
         .all()
