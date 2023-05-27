@@ -4,12 +4,12 @@ from .helper import (
     set_client_cookies_from_response,
     user1,
     user2,
+    user3,
     repository,
     username,
     code_ok,
     code_ok_response,
 )
-import pytest
 
 
 def test_setup(db_action, auth):
@@ -88,7 +88,101 @@ def test_search(client, login_response):
     assert code_ok_response(res)
     assert len(res.json) == 3
     assert (
-        res.json[0]["username"] == "user1"
-        and res.json[1]["username"] == "user2"
-        and res.json[2]["username"] == "user3"
+        res.json[0]["username"] == user1["username"]
+        and res.json[1]["username"] == user2["username"]
+        and res.json[2]["username"] == user3["username"]
     )
+
+
+def test_friends(client, login_response):
+    set_client_cookies_from_response(client, login_response)
+
+    data = client.get("/api/friends").json
+
+    assert len(data) == 1
+    assert data[0]["username"] == user1["username"]
+
+
+def test_send_message(app, client, login_response):
+    set_client_cookies_from_response(client, login_response)
+
+    response = client.post(
+        f"/api/send_message/{user1['username']}", json={"message": "test message"}
+    )
+    assert code_ok_response(response)
+
+    with app.app_context():
+        user = repository.get_user_by_id(login_response.json["id"])
+        assert len(user.messages_sent) == 1
+        assert user.messages_sent[0].text == "test message"
+
+
+def test_send_message_empty(client, login_response):
+    set_client_cookies_from_response(client, login_response)
+
+    response = client.post(
+        f"/api/send_message/{user1['username']}", json={"message": ""}
+    )
+    assert not code_ok_response(response)
+    assert "cannot be empty" in response.json["message"]
+
+
+def test_send_message_non_friend(client, login_response):
+    set_client_cookies_from_response(client, login_response)
+
+    response = client.post(
+        f"/api/send_message/{user2['username']}", json={"message": "test message 2"}
+    )
+
+    assert not code_ok_response(response)
+    assert "not friends" in response.json["message"].lower()
+
+
+def test_messages(client, login_response, login_response_user1):
+    set_client_cookies_from_response(client, login_response_user1)
+
+    client.post(
+        f"/api/send_message/{username}", json={"message": "sending message back"}
+    )
+
+    set_client_cookies_from_response(client, login_response)
+    data = client.get(f"/api/messages/{user1['username']}").json
+    assert len(data) == 2
+    assert data[0]["text"] == "test message"
+    assert data[1]["text"] == "sending message back"
+
+
+def test_get_room(client, login_response):
+    set_client_cookies_from_response(client, login_response)
+
+    res = client.get(f"/api/room/{user1['username']}")
+    assert code_ok_response(res)
+    assert res.json.get("room", None) is not None
+
+
+def test_get_room_not_friends(client, login_response):
+    set_client_cookies_from_response(client, login_response)
+
+    res = client.get(f"/api/room/{user2['username']}")
+    assert not code_ok_response(res)
+    assert "are not friends" in res.json["message"]
+
+
+def test_remove_friend(app, client, login_response):
+    set_client_cookies_from_response(client, login_response)
+
+    res = client.delete(f"/api/delete_friend/{user1['username']}")
+    assert code_ok_response(res)
+
+    with app.app_context():
+        user = repository.get_user_by_username(username)
+        user1_ = repository.get_user_by_username(user1["username"])
+        assert user1_ not in user.friends
+
+
+def test_remove_friend_failed(client, login_response):
+    set_client_cookies_from_response(client, login_response)
+
+    res = client.delete(f"/api/delete_friend/{user2['username']}")
+    assert not code_ok_response(res)
+    assert "are not friends" in res.json["message"].lower()
