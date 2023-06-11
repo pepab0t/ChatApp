@@ -1,0 +1,44 @@
+{% extends 'new/index.html' %} {% block body %}
+<section class="wrap">
+  <div class="background" alt=""></div>
+  <div class="log-wrapper log-wrapper--register">
+    <div class="log--register">
+      <div class="info-box info-box--register">
+        <div class="info__logo">Chat<br />App</div>
+        <div class="info__description info__description-register">
+          Chat with <br />
+          your <strong>friends</strong><br />
+          around whole <br />world
+        </div>
+        <img
+          class="info__img info__img--register"
+          src="{{ url_for('static', filename='images/phone.png') }}"
+          alt="Phone"
+        />
+        <p class="info__content info__content--register">
+          Discrover new friends, connect with people,<br />
+          make new memories!
+        </p>
+      </div>
+      <div class="sign__screen">
+        <div class="sign__title">Sign In</div>
+        <div class="sign__subtitle">
+          Don't have an account?
+          <a href="{{get_url('views.register')}}">Register</a>
+        </div>
+        <form
+          class="sign__form"
+          action="{{ get_url('views.login') }}"
+          method="post"
+        >
+          <label>Username</label>
+          <input type="text" placeholder="johndoe123" name="username" />
+          <label class="sign__label">Password</label>
+          <input type="text" label="password" name="password" />
+          <button class="sign__button" type="submit">Log in</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

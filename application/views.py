@@ -41,7 +41,9 @@ def home():
         return redirect_login()
 
     data = response.json()
-    r = make_response(render_template("home.html", user=current_user(), friends=data))
+    r = make_response(
+        render_template("new/index.html", user=current_user(), friends=data)
+    )
     set_cookies(r, response.cookies)
     return r
 
@@ -49,19 +51,19 @@ def home():
 @views.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        return render_template("login.html")
+        return render_template("new/login.html")
 
     username = request.form.get("username")
     password = request.form.get("password")
     if username is None or password is None:
-        return render_template("login.html")
+        return render_template("new/login.html")
 
     auth = "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode()
 
     response = requests.post(get_url("auth.login"), headers={"Authorization": auth})
 
     if not response.ok:
-        return render_template("login.html")
+        return render_template("new/login.html")
 
     data = response.json()
     session["user_id"] = data["id"]
@@ -80,13 +82,13 @@ def login():
 @views.route("/register", methods=["POST", "GET"])
 def register():
     if request.method == "GET":
-        return render_template("register.html")
+        return render_template("new/register.html")
 
     username = request.form.get("username")
     email = request.form.get("email")
     password = request.form.get("password")
     if any(map(lambda x: x is None, [username, email, password])):
-        return render_template("register.html")
+        return render_template("new/register.html")
 
     response = requests.post(
         get_url("auth.register"),
@@ -94,7 +96,7 @@ def register():
     )
 
     if not response.ok:
-        return render_template("register.html")
+        return render_template("new/register.html")
 
     user = response.json()
 
