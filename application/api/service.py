@@ -1,3 +1,4 @@
+from config import MESSAGES_PER_PAGE, USERS_PER_PAGE
 from .. import repository
 from ..exceptions import EntityNotFound, Forbidden, InvalidRequestException
 
@@ -72,7 +73,7 @@ def remove_friend(user_id: int, username: str):
     repository.remove_friends(user1, user2)
 
 
-def search(user_id: int, text: str, exclude_friends: bool):
+def search(user_id: int, text: str, exclude_friends: bool, page: int | None = None):
     if text == "":
         return [], 200
 
@@ -80,15 +81,11 @@ def search(user_id: int, text: str, exclude_friends: bool):
     text = f"%{text}%"
 
     if exclude_friends:
-        users = repository.get_users_by_text_exlude_friends(user, text)
+        users = repository.get_users_by_text_exlude_friends(user, text, page=page)
     else:
-        users = repository.get_users_by_text(text)
+        users = repository.get_users_by_text(user, text, page=page)
 
-    try:
-        users.remove(user)
-    except ValueError:
-        pass
-    return [u.dict() for u in users], 200
+    return [u.dict() for u in users], 200  ### ENDED HERE
 
 
 def send_message(user_id: int, username: str, text: str):

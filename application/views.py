@@ -41,9 +41,7 @@ def home():
         return redirect_login()
 
     data = response.json()
-    r = make_response(
-        render_template("new/index.html", user=current_user(), friends=data)
-    )
+    r = make_response(render_template("home.html", user=current_user(), friends=data))
     set_cookies(r, response.cookies)
     return r
 

@@ -27,15 +27,15 @@ def create_users():
         db.session.add_all(users)
         db.session.commit()
 
-        r = models.Request(sender=users[0], receiver=users[1])
-        db.session.add(r)
-        db.session.commit()
+        # r = models.Request(sender=users[0], receiver=users[1])
+        # db.session.add(r)
+        # db.session.commit()
 
-        room = models.Room()
-        room.users.append(users[0])
-        room.users.append(users[1])
-        db.session.add(room)
-        db.session.commit()
+        # room = models.Room()
+        # room.users.append(users[0])
+        # room.users.append(users[1])
+        # db.session.add(room)
+        # db.session.commit()
 
 
 create_users()
