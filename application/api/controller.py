@@ -60,10 +60,11 @@ def remove_friend(user_id: int, username: str):
 def search(user_id: int):
     if (text := request.args.get("search", type=str)) is None:
         raise InvalidRequestException("no query parameter `search`")
+    page: int | None = request.args.get("page", None, type=lambda x: int(x) or None)
     exclude_friends = request.args.get(
         "exclude_friends", "", type=lambda x: x.lower() in {"true", "1"}
     )
-    results, code = service.search(user_id, text, exclude_friends)  # type: ignore
+    results, code = service.search(user_id, text, exclude_friends, page)  # type: ignore
     return jsonify(results), code
 
 

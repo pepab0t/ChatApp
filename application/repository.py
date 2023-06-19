@@ -1,4 +1,5 @@
 from .database.models import User, Request, Message, Room
+from config import USERS_PER_PAGE, MESSAGES_PER_PAGE
 from .database import db
 from .exceptions import DatabaseError
 from sqlalchemy.exc import IntegrityError
@@ -83,13 +84,23 @@ def get_user_by_username(username: str):
     return User.query.filter_by(username=username).first()
 
 
-def get_users_by_text(text: str):
-    return User.query.filter(User.username.like(text)).order_by(User.username).all()
+def get_users_by_text(user: User, text: str, page: int | None = None):
+    q = (
+        User.query.except_(  # .filter(User.id != user.id)
+            User.query.filter(User.id == user.id)
+        )  # .filter(User.id != user.id)
+        .filter(User.username.like(text))
+        .order_by(User.username)
+    )
+    if page is None:
+        return q.all()
+    return q.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
 
 
-def get_users_by_text_exlude_friends(user: User, text: str):
-    return (
+def get_users_by_text_exlude_friends(user: User, text: str, page: int | None = None):
+    q = (
         User.query.filter(User.username.like(text))
+        .except_(User.query.filter(User.id == user.id))  # .filter(User.id != user.id)
         .filter(
             ~User.friends.any(User.id == user.id),
             ~User.requests_received.any(
@@ -97,8 +108,10 @@ def get_users_by_text_exlude_friends(user: User, text: str):
             ),
         )
         .order_by(User.username)
-        .all()
     )
+    if page is None:
+        return q.all()
+    return q.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
 
 
 def create_message(sender: User, receiver: User, text: str):
