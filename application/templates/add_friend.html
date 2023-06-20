@@ -74,7 +74,10 @@ Login
             return response.json()})
         .then(data => {
             console.log(data);
-            data.forEach(displayResult);
+            data.data.forEach(displayResult);
+            let li = document.createElement("li");
+            li.innerHTML = `pages: ${data.pages} page: ${data.page}`;
+            ul.append(li);
         })
         .catch(error => console.log(error))
 

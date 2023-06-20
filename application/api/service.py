@@ -1,4 +1,7 @@
+from flask_sqlalchemy.pagination import Pagination
+
 from config import MESSAGES_PER_PAGE, USERS_PER_PAGE
+
 from .. import repository
 from ..exceptions import EntityNotFound, Forbidden, InvalidRequestException
 
@@ -85,7 +88,14 @@ def search(user_id: int, text: str, exclude_friends: bool, page: int | None = No
     else:
         users = repository.get_users_by_text(user, text, page=page)
 
-    return [u.dict() for u in users], 200  ### ENDED HERE
+    if isinstance(users, Pagination):
+        page_ = users.page
+        pages_ = users.pages
+    else:
+        page_ = None
+        pages_ = None
+
+    return {"page": page_, "pages": pages_, "data": [u.dict() for u in users]}, 200  ### ENDED HERE
 
 
 def send_message(user_id: int, username: str, text: str):
