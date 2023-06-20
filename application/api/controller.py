@@ -1,12 +1,13 @@
-from flask import Blueprint, jsonify, request
 import json
+
+from flask import Blueprint, jsonify, request
 from flask.wrappers import Response
+
 from ..auth.token import token_valid
 from ..exceptions import InvalidRequestException
 from . import service
 
 api = Blueprint("api", __name__, url_prefix="/api")
-
 
 @api.get("/test")
 @token_valid()
@@ -62,7 +63,7 @@ def search(user_id: int):
         raise InvalidRequestException("no query parameter `search`")
     page: int | None = request.args.get("page", None, type=lambda x: int(x) or None)
     exclude_friends = request.args.get(
-        "exclude_friends", "", type=lambda x: x.lower() in {"true", "1"}
+        "exclude_friends", "false", type=lambda x: x.lower() in {"true", "1"}
     )
     results, code = service.search(user_id, text, exclude_friends, page)  # type: ignore
     return jsonify(results), code

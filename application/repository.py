@@ -1,10 +1,12 @@
-from .database.models import User, Request, Message, Room
-from config import USERS_PER_PAGE, MESSAGES_PER_PAGE
-from .database import db
-from .exceptions import DatabaseError
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy import and_, or_
+from sqlalchemy.exc import IntegrityError
+
+from config import MESSAGES_PER_PAGE, USERS_PER_PAGE
+
+from .database import db
+from .database.models import Message, Request, Room, User
 from .entity import UserRegisterEntity
+from .exceptions import DatabaseError
 
 
 def register_user(user: UserRegisterEntity):
