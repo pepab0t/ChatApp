@@ -62,7 +62,6 @@ Chat
             }
         })
         .catch(error => console.log("error"))
-        
         return false;
     }
     message_form.onsubmit = sendMessage;
@@ -70,9 +69,9 @@ Chat
 </script>
 
 <script>
-    fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}"))
+    fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}") + new URLSearchParams())
     .then(response => response.json())
-    .then(data => data.forEach(message => createMessage(message.sender, message.text)))
+    .then(data => data.data.forEach(message => createMessage(message.sender, message.text)))
     .catch(error => console.log(error))
 </script>
 

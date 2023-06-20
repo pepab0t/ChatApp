@@ -1,4 +1,4 @@
-from application import create_app, DB_NAME
+from application import DB_NAME, create_app
 
 
 def main():

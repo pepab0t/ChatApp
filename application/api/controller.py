@@ -45,7 +45,8 @@ def decline_request(user_id: int):
 @api.route("/requests", methods=["GET"])
 @token_valid()
 def get_requests(user_id: int):
-    requests = service.get_all_pending_requests_received(user_id)
+    page: int | None = request.args.get("page", None, type=lambda x: int(x) or None)
+    requests = service.get_all_pending_requests_received(user_id, page)
     return jsonify(requests), 200
 
 
@@ -82,7 +83,8 @@ def send_message(user_id: int, username: str):
 @api.route("/friends", methods=["GET"])
 @token_valid()
 def get_friends(user_id: int):
-    friends, code = service.get_friends(user_id)
+    page = request.args.get("page", None, type=int)
+    friends, code = service.get_friends(user_id, page)
     return jsonify(friends), code
 
 
@@ -96,5 +98,6 @@ def get_room(user_id: int, username: str):
 @api.get("/messages/<string:username>")
 @token_valid()
 def get_messages(user_id: int, username: str):
-    messages, code = service.get_messages(user_id, username)
+    page: int | None = request.args.get("page", None, type=int)
+    messages, code = service.get_messages(user_id, username, page)
     return jsonify(messages), code
