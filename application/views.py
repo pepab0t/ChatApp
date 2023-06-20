@@ -1,14 +1,16 @@
+import base64
+
+import requests
 from flask import (
     Blueprint,
-    render_template,
-    url_for,
-    request,
-    redirect,
     make_response,
+    redirect,
+    render_template,
+    request,
     session,
+    url_for,
 )
-import requests
-import base64
+
 from . import repository
 
 views = Blueprint("views", __name__)
@@ -40,7 +42,7 @@ def home():
     if not response.ok:
         return redirect_login()
 
-    data = response.json()
+    data = response.json().get('data')
     r = make_response(render_template("home.html", user=current_user(), friends=data))
     set_cookies(r, response.cookies)
     return r
@@ -135,7 +137,7 @@ def friend_requests():
     if not response.ok:
         return redirect_login()
 
-    data = response.json()
+    data = response.json().get('data')
     r = make_response(
         render_template("requests.html", user=current_user(), requests=data)
     )
