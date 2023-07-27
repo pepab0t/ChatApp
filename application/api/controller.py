@@ -1,12 +1,13 @@
-from flask import Blueprint, jsonify, request
 import json
+
+from flask import Blueprint, jsonify, request
 from flask.wrappers import Response
+
 from ..auth.token import token_valid
 from ..exceptions import InvalidRequestException
 from . import service
 
 api = Blueprint("api", __name__, url_prefix="/api")
-
 
 @api.get("/test")
 @token_valid()
@@ -44,7 +45,8 @@ def decline_request(user_id: int):
 @api.route("/requests", methods=["GET"])
 @token_valid()
 def get_requests(user_id: int):
-    requests = service.get_all_pending_requests_received(user_id)
+    page: int | None = request.args.get("page", None, type=lambda x: int(x) or None)
+    requests = service.get_all_pending_requests_received(user_id, page)
     return jsonify(requests), 200
 
 
@@ -62,7 +64,7 @@ def search(user_id: int):
         raise InvalidRequestException("no query parameter `search`")
     page: int | None = request.args.get("page", None, type=lambda x: int(x) or None)
     exclude_friends = request.args.get(
-        "exclude_friends", "", type=lambda x: x.lower() in {"true", "1"}
+        "exclude_friends", "false", type=lambda x: x.lower() in {"true", "1"}
     )
     results, code = service.search(user_id, text, exclude_friends, page)  # type: ignore
     return jsonify(results), code
@@ -81,7 +83,8 @@ def send_message(user_id: int, username: str):
 @api.route("/friends", methods=["GET"])
 @token_valid()
 def get_friends(user_id: int):
-    friends, code = service.get_friends(user_id)
+    page = request.args.get("page", None, type=int)
+    friends, code = service.get_friends(user_id, page)
     return jsonify(friends), code
 
 
@@ -95,5 +98,6 @@ def get_room(user_id: int, username: str):
 @api.get("/messages/<string:username>")
 @token_valid()
 def get_messages(user_id: int, username: str):
-    messages, code = service.get_messages(user_id, username)
+    page: int | None = request.args.get("page", None, type=int)
+    messages, code = service.get_messages(user_id, username, page)
     return jsonify(messages), code

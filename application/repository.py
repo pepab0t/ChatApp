@@ -1,10 +1,12 @@
-from .database.models import User, Request, Message, Room
-from config import USERS_PER_PAGE, MESSAGES_PER_PAGE
-from .database import db
-from .exceptions import DatabaseError
+from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import and_, or_
+
+from config import MESSAGES_PER_PAGE, REQUESTS_PER_PAGE, USERS_PER_PAGE
+
+from .database import db
+from .database.models import Message, Request, Room, User
 from .entity import UserRegisterEntity
+from .exceptions import DatabaseError
 
 
 def register_user(user: UserRegisterEntity):
@@ -59,12 +61,16 @@ def create_request(user1: User, user2: User):
     return r
 
 
-def get_all_pending_requests_received(user_id: int):
+def get_all_pending_requests_received(user_id: int, page: int | None = None):
     user = User.query.get(user_id)
     if user is None:
         return None
 
-    return filter(lambda x: x.accepted is None, user.requests_received)
+    query = Request.query.filter(Request.accepted == None, Request.receiver_id == user_id).order_by(Request.timestamp.desc())
+
+    if page is None:
+        return query.all()
+    return query.paginate(page=page, per_page=REQUESTS_PER_PAGE, error_out=True)
 
 
 def get_request_by_id(id: int):
@@ -78,6 +84,10 @@ def get_opened_request_by_id(id: int):
 
 def get_user_by_id(id: int):
     return User.query.get(id)
+
+def get_friends_paginate(user: User, page):
+    query = user.query.filter(User.friends.any(User.id == user.id))
+    return query.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
 
 
 def get_user_by_username(username: str):
@@ -141,7 +151,7 @@ def get_room(user1: User, user2: User):
     return room
 
 
-def get_messages(user: User, friend: User):
+def get_messages(user: User, friend: User, page: int | None = None):
     messages = (
         Message.query.filter(
             or_(
@@ -155,8 +165,9 @@ def get_messages(user: User, friend: User):
                 Message.receiver.has(id=friend.id),
             )
         )
-        .order_by(Message.timestamp)
-        .all()
+        .order_by(Message.timestamp.desc())
     )
 
-    return messages
+    if page is None:
+        return messages.all()
+    return messages.paginate(page=page, per_page=MESSAGES_PER_PAGE, error_out=True)

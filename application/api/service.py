@@ -1,4 +1,5 @@
-from config import MESSAGES_PER_PAGE, USERS_PER_PAGE
+from flask_sqlalchemy.pagination import Pagination
+
 from .. import repository
 from ..exceptions import EntityNotFound, Forbidden, InvalidRequestException
 
@@ -27,12 +28,16 @@ def send_request(user_id: int, user_to: str):
     return request.dict(), 201
 
 
-def get_all_pending_requests_received(user_id):
-    requests = repository.get_all_pending_requests_received(user_id)
+def get_all_pending_requests_received(user_id, page: int | None = None):
+    requests = repository.get_all_pending_requests_received(user_id, page)
     if requests is None:
         raise EntityNotFound(f"User ID `{user_id}` not found")
 
-    return [r.dict() for r in requests]
+    data = list(map(lambda r: r.dict(), requests))
+    if isinstance(requests, Pagination):
+        return {"page": page, "pages": requests.pages, "data": data}
+
+    return {"page": None, "pages": None, "data": data}
 
 
 def approve_request(user_id: int, request_id: int):
@@ -85,7 +90,14 @@ def search(user_id: int, text: str, exclude_friends: bool, page: int | None = No
     else:
         users = repository.get_users_by_text(user, text, page=page)
 
-    return [u.dict() for u in users], 200  ### ENDED HERE
+    if isinstance(users, Pagination):
+        page_ = users.page
+        pages_ = users.pages
+    else:
+        page_ = None
+        pages_ = None
+
+    return {"page": page_, "pages": pages_, "data": [u.dict() for u in users]}, 200  ### ENDED HERE
 
 
 def send_message(user_id: int, username: str, text: str):
@@ -103,9 +115,22 @@ def send_message(user_id: int, username: str, text: str):
     return message.dict(), 201
 
 
-def get_friends(user_id: int):
+def get_friends(user_id: int, page: int | None = None):
+    ### ADD SORTING FRIENDS BY NEWEST MESSAGES
+
     user = repository.get_user_by_id(user_id)
-    return [friend.dict() for friend in user.friends], 200
+    if user is None:
+        raise EntityNotFound(f"User ID `{user_id}` not found")
+
+    if page is None:
+        friends = user.friends
+    else:
+        friends = repository.get_friends_paginate(user, page)
+
+    data = list(map(lambda friend: friend.dict(), friends))
+    if isinstance(friends, Pagination):
+        return {"page": friends.page, "pages": friends.pages, "data": data}, 200
+    return {"page": None, "pages": None, "data": data}, 200
 
 
 def get_room(user_id: int, username: str):
@@ -121,10 +146,16 @@ def get_room(user_id: int, username: str):
     return {"room": room.get_name()}, 200
 
 
-def get_messages(user_id: int, friend_username: str):
+def get_messages(user_id: int, friend_username: str, page: int | None = None):
     if (user := repository.get_user_by_id(user_id)) is None:
         raise EntityNotFound(f"User ID `{user_id}` not found")
     if (friend := repository.get_user_by_username(friend_username)) is None:
         raise EntityNotFound(f"User `{friend_username}` not found")
 
-    return list(map(lambda m: m.dict(), repository.get_messages(user, friend))), 200
+    messages = repository.get_messages(user, friend, page)
+    data = map(lambda m: m.dict(), messages)
+    if isinstance(messages, Pagination):
+        return {"page": page, "pages": messages.pages, "data": list(data)}, 200
+    
+    return {"page": None, "pages": None, "data": list(data)}, 200
+
