@@ -1,13 +1,13 @@
-from application.entity import UserRegisterEntity
-from application.database import db, models
+import os
 
 from application import create_flask
-
-import os
+from application.database import db, models
+from application.entity import UserRegisterEntity
 
 app = create_flask("sqlite:///database.db")
 
 os.system("rm instance/database.db")
+os.system("rd instance/database.db")
 
 
 def create_users():
@@ -27,9 +27,10 @@ def create_users():
         db.session.add_all(users)
         db.session.commit()
 
-        # r = models.Request(sender=users[0], receiver=users[1])
-        # db.session.add(r)
-        # db.session.commit()
+        for sen, rec in ((1, 0), (2, 1), (2, 0)):
+            r = models.Request(sender=users[sen], receiver=users[rec])
+            db.session.add(r)
+            db.session.commit()
 
         # room = models.Room()
         # room.users.append(users[0])
