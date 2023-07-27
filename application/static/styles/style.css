@@ -134,7 +134,7 @@ button:hover {
   opacity: 0.5;
   position: absolute;
   z-index: -50;
-  background-color: #3c37ff;
+  background-color: white;
 }
 
 .info-box {
