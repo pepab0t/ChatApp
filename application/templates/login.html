@@ -1,16 +1,41 @@
-
-{% extends 'base.html'%}
-
-{% block title%}
-Login
-{% endblock %}
-
-{% block body%}
-<form id="login_form" method="POST" action="{{ get_url('views.login') }}">
-    <label for="">username</label>
-    <input type="text" name="username" id="username_inp">
-    <label for="">password</label>
-    <input type="password" name="password" id="password_inp">
-    <input type="submit">
-</form>
-{% endblock %}
+{% extends 'base.html'%} {% block body%}
+<div class="background" alt=""></div>
+<div class="log-wrapper log-wrapper--register">
+  <div class="log--register">
+    <div class="info-box info-box--register">
+      <div class="info__logo">Whispr</div>
+      <div class="info__description info__description-register">
+        Chat with <br />
+        your <strong>friends</strong><br />
+        around whole <br />world
+      </div>
+      <img
+        class="info__img info__img--register"
+        src="{{ url_for('static', filename='images/phone.png') }}"
+        alt="Phone"
+      />
+      <p class="info__content info__content--register">
+        Discrover new friends, connect with people,<br />
+        make new memories!
+      </p>
+    </div>
+    <div class="sign__screen">
+      <div class="sign__title">Sign Up</div>
+      <div class="sign__subtitle">
+        Dont have an account? <a href="">Register</a>
+      </div>
+      <form
+        class="sign__form"
+        method="POST"
+        action="{{ get_url('views.login') }}"
+      >
+        <label>Username</label>
+        <input type="text" placeholder="john.doe@gmail.com" name="username" />
+        <label class="sign__label">Password</label>
+        <input type="text" label="password" name="password" />
+        <button class="sign__button" type="submit">Log in</button>
+      </form>
+    </div>
+  </div>
+</div>
+{%endblock%}

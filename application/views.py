@@ -42,8 +42,10 @@ def home():
     if not response.ok:
         return redirect_login()
 
-    data = response.json().get('data')
-    r = make_response(render_template("home.html", user=current_user(), friends=data))
+    data = response.json().get("data")
+    r = make_response(
+        render_template("messages-list.html", user=current_user(), friends=data)
+    )
     set_cookies(r, response.cookies)
     return r
 
@@ -51,7 +53,7 @@ def home():
 @views.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        return render_template("new/login.html")
+        return render_template("login.html")
 
     username = request.form.get("username")
     password = request.form.get("password")
@@ -63,7 +65,7 @@ def login():
     response = requests.post(get_url("auth.login"), headers={"Authorization": auth})
 
     if not response.ok:
-        return render_template("new/login.html")
+        return render_template("login.html")
 
     data = response.json()
     session["user_id"] = data["id"]
@@ -82,13 +84,13 @@ def login():
 @views.route("/register", methods=["POST", "GET"])
 def register():
     if request.method == "GET":
-        return render_template("new/register.html")
+        return render_template("register.html")
 
     username = request.form.get("username")
     email = request.form.get("email")
     password = request.form.get("password")
     if any(map(lambda x: x is None, [username, email, password])):
-        return render_template("new/register.html")
+        return render_template("register.html")
 
     response = requests.post(
         get_url("auth.register"),
@@ -96,7 +98,7 @@ def register():
     )
 
     if not response.ok:
-        return render_template("new/register.html")
+        return render_template("register.html")
 
     user = response.json()
 
@@ -137,7 +139,7 @@ def friend_requests():
     if not response.ok:
         return redirect_login()
 
-    data = response.json().get('data')
+    data = response.json().get("data")
     r = make_response(
         render_template("requests.html", user=current_user(), requests=data)
     )
@@ -150,7 +152,7 @@ def add_friend():
     response = requests.get(get_url("api.test"), cookies=request.cookies)
     if not response.ok:
         return redirect_login()
-    r = make_response(render_template("add_friend.html", user=current_user()))
+    r = make_response(render_template("search.html", user=current_user()))
     set_cookies(r, response.cookies)
     return r
 
