@@ -25,6 +25,7 @@
     <nav></nav>
     <section class="section">
       <div class="chat-wrap">
+        {% if nav %}
         <div class="sidebar">
           <p class="sidebar-logo">Whispr</p>
           <div class="sidebar-menu">
@@ -48,6 +49,7 @@
             <a href="{{ url_for('views.logout') }}">Logout</a>
           </div>
         </div>
+        {% endif %}
         {% block body %} {% endblock%}
       </div>
     </section>

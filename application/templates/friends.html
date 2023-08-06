@@ -1,0 +1,49 @@
+{% extends 'base.html'%} {% block body%}
+<div class="chat-container">
+  <div class="user-header">
+    <div class="user-info">
+      <img src="./user.png" alt="" class="user-photo" />
+      <h3 class="user-name">James Doe</h3>
+    </div>
+  </div>
+  <div class="chat-window">
+    <div class="messages-window">
+      <div class="message-wrapper">
+        <span class="message-time"> 11:01 </span>
+        <span class="message-sender"> James Doe </span>
+        <div class="message-bubble">Hello I have to tell you something</div>
+      </div>
+      <div class="message-wrapper">
+        <span class="message-time"> 11:01 </span>
+        <span class="message-sender"> James Doe </span>
+        <div class="message-bubble">Hello I have to tell you something</div>
+        <div class="message-bubble">Hello I have to tell you something</div>
+        <div class="message-bubble">Hello I have to tell you something</div>
+        <div class="message-bubble">Hello I have to tell you something</div>
+        <div class="message-bubble">Hello I have to tell you something</div>
+      </div>
+      <div class="message-wrapper--second">
+        <div class="message-time">11:05</div>
+        <span class="message-reciever"> You </span>
+        <div class="message-bubble--second">
+          Hello I have to tell you something
+        </div>
+        <div class="message-bubble--second">
+          Hello I have to tell you something
+        </div>
+        <div class="message-bubble--second">
+          Hello I have to tell you something
+        </div>
+      </div>
+    </div>
+    <div class="chat-wrapper">
+      <textarea
+        placeholder="Say hello to your friend..."
+        class="chat-input"
+        name="chat-input"
+      ></textarea>
+      <button>Odeslat</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
