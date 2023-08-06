@@ -300,6 +300,8 @@ button:hover {
 .chat-wrap {
   display: flex;
   height: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 .chat-container {

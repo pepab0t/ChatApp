@@ -1,0 +1,78 @@
+
+{% extends 'base.html'%}
+
+{% block title%}
+Chat
+{% endblock %}
+
+{% block body%}
+
+<h1>Chat with {{with_user}}</h1>
+<div id="content">
+</div>
+<form id="message_form">
+    <input type="text" name="" id="message">
+    <input type="submit">
+</form>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    var socketio = io();
+
+    socketio.on("connect", function() {
+        socketio.emit("join_room", {room: "{{room}}"})
+    })
+
+    socketio.on("disconnect", function() {
+        socketio.emit("leave_room", {room: "{{room}}"})
+    })
+
+    const content = document.getElementById("content")
+    const message_form = document.getElementById("message_form")
+    const message_input = document.getElementById("message")
+
+    const createMessage = (name, msg) => {
+        const message = document.createElement('p');
+        message.innerHTML = `${name}: ${msg}`
+        content.append(message)
+    }
+
+    socketio.on("message", data => createMessage(data.name, data.msg))
+
+    const sendMessage =  () => {
+        const message = document.getElementById("message");
+        if (message.value == "") return false;
+
+        console.log(message.value);
+
+        fetch("{{ get_url('api.send_message', username='__var1__') }}".replace("__var1__", '{{with_user}}'), {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({message: message.value})
+        })
+        .then(response => {
+            if (response.ok) {
+                socketio.emit("message", {msg: message.value, name: "{{user.username}}", room: "{{room}}" })
+                message.value = ""
+            }
+        })
+        .catch(error => console.log("error"))
+        return false;
+    }
+    message_form.onsubmit = sendMessage;
+
+</script>
+
+<script>
+    fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}") + new URLSearchParams())
+    .then(response => response.json())
+    .then(json => json.data.forEach(message => createMessage(message.sender, message.text)))
+    .catch(error => console.log(error))
+</script>
+
+{% endblock %}

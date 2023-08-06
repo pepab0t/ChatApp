@@ -1,0 +1,16 @@
+
+{% extends 'base.html'%}
+
+{% block title%}
+Login
+{% endblock %}
+
+{% block body%}
+<form id="login_form" method="POST" action="{{ get_url('views.login') }}">
+    <label for="">username</label>
+    <input type="text" name="username" id="username_inp">
+    <label for="">password</label>
+    <input type="password" name="password" id="password_inp">
+    <input type="submit">
+</form>
+{% endblock %}

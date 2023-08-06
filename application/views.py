@@ -44,7 +44,9 @@ def home():
 
     data = response.json().get("data")
     r = make_response(
-        render_template("messages-list.html", user=current_user(), friends=data)
+        render_template(
+            "messages-list.html", user=current_user(), friends=data, nav=True
+        )
     )
     set_cookies(r, response.cookies)
     return r
@@ -141,7 +143,7 @@ def friend_requests():
 
     data = response.json().get("data")
     r = make_response(
-        render_template("requests.html", user=current_user(), requests=data)
+        render_template("requests.html", user=current_user(), requests=data, nav=True)
     )
     set_cookies(r, response.cookies)
     return r
@@ -152,7 +154,7 @@ def add_friend():
     response = requests.get(get_url("api.test"), cookies=request.cookies)
     if not response.ok:
         return redirect_login()
-    r = make_response(render_template("search.html", user=current_user()))
+    r = make_response(render_template("search.html", user=current_user(), nav=True))
     set_cookies(r, response.cookies)
     return r
 
@@ -172,6 +174,7 @@ def open_chat(username: str):
             user=current_user(),
             with_user=username,
             room=response.json()["room"],
+            nav=True,
         )
     )
 
