@@ -1,0 +1,57 @@
+
+{% extends 'base.html'%}
+
+{% block title%}
+Login
+{% endblock %}
+
+{% block body%}
+
+<h1>Friend requests</h1>
+<div>
+    <ul>
+        {% for req in requests %}
+        <p>test</p>
+        <li> {{req['sender']['username']}} <button onclick="acceptRequest({{req['id']}})">Accept</button> <button onclick="declineRequest({{req['id']}})">Decline</button> </li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    const token = "{{session['token']}}";
+    const acceptRequest = function(rid){
+        console.log(rid);
+        fetch("{{ get_url('api.approve_request') }}" + "?" + new URLSearchParams({
+            request_id: rid
+        }), {
+            method: "POST"
+        })
+        .then( response => {
+            if (response.ok) {
+                window.location.replace( "{{ get_url('views.friend_requests') }}" );   
+            }
+        })
+        .catch( error => console.log(error));
+    }
+    const declineRequest = function(rid){
+        fetch("{{ get_url('api.decline_request') }}" + "?" + new URLSearchParams({
+            request_id: rid
+        }), {
+            method: "POST"
+        })
+        .then( response => {
+            if (response.ok) {
+                window.location.replace( "{{ get_url('views.friend_requests') }}" );   
+            }
+        })
+        .catch( error => console.log(error));
+    }
+
+    console.log("abc")
+
+
+</script>
+{% endblock %}
