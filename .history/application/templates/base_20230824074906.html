@@ -27,43 +27,27 @@
       <div class="chat-wrap">
         {% if nav %}
         <div class="sidebar">
-          <p class="sidebar-logo">
-            <img class="sidebar-logo-img" src="{{ url_for('static', filename='images/whisper-logo.png')}}"">
-            Whispr</p>
+          <p class="sidebar-logo">Whispr</p>
           <div class="sidebar-menu">
             <a class="sidebar-icon" href="{{ url_for('views.home')}}">
+              Chats
               <img
-              class="sidebar-image"
-              src="{{ url_for('static', filename='images/chat-icon.png')}}"
-              alt=""
-            />
-            Chats
+                class="sidebar-image"
+                src="{{ url_for('static', filename='images/chat-icon.png')}}"
+                alt=""
+              />
             </a>
             <a class="sidebar-icon" href="{{ url_for('views.add_friend') }}">
+              Search
               <img
-              class="sidebar-image"
-              src="{{ url_for('static', filename='images/search.png')}}"
-              alt=""
-            />
-            Search
+                class="sidebar-image"
+                src="{{ url_for('static', filename='images/user-icon.png')}}"
+                alt=""
+              />
             </a>
-            <a href="{{ url_for('views.friend_requests') }}">
-              <img
-              class="sidebar-image"
-              src="{{ url_for('static', filename='images/user-icon.png')}}"
-              alt=""
-            />
-              Requests
-            </a>
+            <a href="{{ url_for('views.friend_requests') }}">Requests</a>
+            <a href="{{ url_for('views.logout') }}">Logout</a>
           </div>
-
-          <a class="sidebar-logout" href="{{ url_for('views.logout') }}">
-            <img
-            class="sidebar-image"
-            src="{{ url_for('static', filename='images/logout.png')}}"
-            alt=""
-          />
-          Logout</a>
         </div>
         {% endif %}
         {% block body %} {% endblock%}
