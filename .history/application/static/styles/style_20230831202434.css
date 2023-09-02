@@ -54,7 +54,7 @@ label {
   overflow: hidden;
 }
 
-input, textarea {
+input textarea {
   border: none;
   font-size: 16px;
   margin-top: 8px;
@@ -70,7 +70,7 @@ input::placeholder {
   color: #bebebe;
 }
 
-input:focus-visible, textarea:focus-visible  {
+input:focus-visible {
   outline: 2px solid #adadad !important;
 }
 

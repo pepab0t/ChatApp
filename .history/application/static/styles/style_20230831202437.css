@@ -70,7 +70,7 @@ input::placeholder {
   color: #bebebe;
 }
 
-input:focus-visible, textarea:focus-visible  {
+input:focus-visible {
   outline: 2px solid #adadad !important;
 }
 
