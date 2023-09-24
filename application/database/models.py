@@ -95,6 +95,7 @@ class Message(db.Model):
     )
     timestamp = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     text = db.Column(db.String(256), nullable=False)
+    seen = db.Column(db.Boolean, default=False)
 
     sender = db.relationship("User", backref="messages_sent", foreign_keys=[sender_id])
     receiver = db.relationship(

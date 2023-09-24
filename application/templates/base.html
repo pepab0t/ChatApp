@@ -22,18 +22,22 @@
     />
   </head>
   <body>
+    {% if nav %}
     <nav class="navbar"> 
       <div class="user-group--search user-group--search-navbar ">
         <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo user-photo--navbar " />
         <div class="message-wrap">
-          <p class="user-name">user1</p>
+          <p class="user-name">{{user.username}}</p>
         </div>
-        <div class="logout">
-           <img src="{{ url_for('static', filename='images/shutdown.png')}}" alt="" class="shutdown" />
-        <span>Log out</span>
-        </div>
+        <a href="{{ url_for('views.logout') }}">
+          <div class="logout">
+            <img src="{{ url_for('static', filename='images/shutdown.png')}}" alt="" class="shutdown" />
+            <span>Logout</span>
+          </div>
+        </a>
       </div>
     </nav>
+    {% endif %}
     <section class="section">
       <div class="chat-wrap">
         {% if nav %}
