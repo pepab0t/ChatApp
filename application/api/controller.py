@@ -105,3 +105,10 @@ def get_messages(user_id: int, username: str):
     page: int | None = request.args.get("page", None, type=int)
     messages, code = service.get_messages(user_id, username, page)
     return jsonify(messages), code
+
+
+@api.get("/see_messages/<string:username>")
+@token_valid()
+def see_messages(user_id: int, username: str):
+    response, code = service.see_messages(user_id, username)
+    return jsonify(response), code
