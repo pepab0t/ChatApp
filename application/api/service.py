@@ -137,7 +137,10 @@ def get_friends(user_id: int, page: int | None = None):
     else:
         friends = repository.get_friends_paginate(user, page)
 
-    message = repository.get_last_message(user, friends[0])
+    if friends:
+        message = repository.get_last_message(user, friends[0])
+    else:
+        message = None
 
     data = list(
         map(
