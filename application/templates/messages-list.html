@@ -5,8 +5,12 @@
   <h1 class="main-title">Messages <span>(2)</span></h1>
   {%for friend in friends%}
   <a href="{{ url_for('views.open_chat', username=friend['username']) }}">
-    <div class="message-tab">
-      <div class="user-info--messages">
+    <div class="message-tab ">
+      {% if friend['last_message'] and not friend['last_message'].seen and user.id != friend.last_message.sender.id %}
+        <div class="user-info--messages unseen-background">
+      {% else %}
+        <div class="user-info--messages">
+      {% endif%}
           <div class="user-group">
             <img src="{{ url_for('static', filename='images/user.png') }}" alt="" class="user-photo--big" />
               <div class="message-wrap">

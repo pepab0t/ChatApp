@@ -77,7 +77,6 @@
   const room = "{{room}}";
 
   document.onkeydown = (e) => {
-    console.log(e.keyCode)
     if (e.keyCode == 13) {
       sendMessage()
     }
@@ -107,14 +106,14 @@
   }
 
   const createMessage = ({text, sender, timestamp}) => {
-      const isMe = sender === "{{user.username}}";
+      const isMe = sender.id == "{{user.id}}";
+      console.log(sender.id)
       const second = isMe ? '--second': ''
       const message = document.createElement('div');
       message.classList.add(`message-wrapper${second}`)
       message.innerHTML = `
 <div class="message-header">
   <span class="message-time"> ${timestamp} </span>
-  <span class="message-sender"> ${sender} </span>
 </div>
 <div class="message-bubble${second}">
   ${text}
@@ -138,5 +137,8 @@
   .then(json => json.data.forEach(message => createMessage(message)))
   .then(scrollBottom)
   .catch(error => console.log(error))
+
+  fetch("{{get_url('api.see_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}"))
+    .then(res => console.log(res.status))
 </script>
 {% endblock %}

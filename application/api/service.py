@@ -116,6 +116,8 @@ def send_message(user_id: int, username: str, text: str, seen: bool):
         raise InvalidRequestException("Users are not friends")
 
     message = repository.create_message(sender, receiver, text, seen)
+    repository.update_last_room_message(sender, receiver, message)
+
     return message.dict(), 201
 
 
@@ -133,23 +135,20 @@ def get_friends(user_id: int, page: int | None = None):
         raise EntityNotFound(f"User ID `{user_id}` not found")
 
     if page is None:
-        friends = sorted(user.friends)
+        friends = repository.get_friends(user)
     else:
         friends = repository.get_friends_paginate(user, page)
 
     if friends:
-        message = repository.get_last_message(user, friends[0])
+        messages = repository.get_last_messages(user, friends)
     else:
-        message = None
+        messages = []
 
-    data = list(
-        map(
-            lambda friend: add_last_message_to_friend(
-                friend, message.dict() if message else {}
-            ),
-            friends,
-        )
-    )
+    data = []
+    for friend, message in zip(friends, messages):
+        item = friend.dict()
+        item["last_message"] = message.dict() if message else dict()
+        data.append(item)
 
     if isinstance(friends, Pagination):
         return {"page": friends.page, "pages": friends.pages, "data": data}, 200
@@ -181,3 +180,12 @@ def get_messages(user_id: int, friend_username: str, page: int | None = None):
         return {"page": page, "pages": messages.pages, "data": list(data)}, 200
 
     return {"page": None, "pages": None, "data": list(data)}, 200
+
+
+def see_messages(user_id: int, username_other: str):
+    user = repository.get_user_by_id(user_id)
+    friend = repository.get_user_by_username(username_other)
+    messages = repository.get_unseen_messages(user, friend)
+    repository.see_messages(messages)
+
+    return {}, 204

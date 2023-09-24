@@ -84,16 +84,27 @@ def get_opened_request_by_id(id: int):
     return out if out.accepted is None else None
 
 
-def get_user_by_id(id: int):
+def get_user_by_id(id: int) -> User:
     return User.query.get(id)
 
 
+def get_friends_query(user: User):
+    q = (
+        User.query.filter(User.friends.any(User.id == user.id))
+        # .join(Room, User.rooms)
+        # .join(Message, Room.last_message)
+        # .order_by(Message.timestamp.desc())
+    )
+
+    return q
+
+
 def get_friends(user: User):
-    user.query.filter()
+    return get_friends_query(user).all()
 
 
 def get_friends_paginate(user: User, page):
-    query = user.query.filter(User.friends.any(User.id == user.id))
+    query = get_friends_query(user)
     return query.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
 
 
@@ -139,7 +150,7 @@ def create_message(sender: User, receiver: User, text: str, seen: bool):
     return message
 
 
-def get_room(user1: User, user2: User):
+def get_room(user1: User, user2: User) -> Room:
     room = (
         Room.query.filter(Room.users.any(User.id == user1.id))
         .filter(Room.users.any(User.id == user2.id))
@@ -158,7 +169,13 @@ def get_room(user1: User, user2: User):
     return room
 
 
-def get_messages(user: User, friend: User, page: int | None = None):
+def update_last_room_message(user1: User, user2: User, last_message: Message):
+    room = get_room(user1, user2)
+    room.last_message_id = last_message.id
+    db.session.commit()
+
+
+def get_messages_query(user: User, friend: User):
     messages = (
         Message.query.filter(
             or_(
@@ -174,17 +191,49 @@ def get_messages(user: User, friend: User, page: int | None = None):
         )
         .order_by(Message.timestamp)  # .desc()
     )
+    return messages
 
+
+def get_messages(user: User, friend: User, page: int | None = None):
+    messages = get_messages_query(user, friend)
     if page is None:
         return messages.all()
     return messages.paginate(page=page, per_page=MESSAGES_PER_PAGE, error_out=True)
 
 
-def get_last_message(user: User, friend: User) -> Message | None:
-    # user.messages_received
-    messages = list(filter(lambda m: m.receiver == friend, user.messages_sent)) + list(
-        filter(lambda m: m.sender == friend, user.messages_received)
+def get_unseen_messages(user: User, friend: User):
+    q = Message.query.filter(
+        Message.seen == False, Message.sender == friend, Message.receiver == user
     )
-    if not messages:
-        return None
-    return sorted(messages, key=lambda m: m.timestamp, reverse=True)[0]
+    return q.all()
+
+
+def get_last_messages(user: User, friends: list[User]) -> list[Message | None]:
+    messages = []
+    for friend in friends:
+        message = (
+            Message.query.filter(
+                or_(
+                    and_(
+                        Message.sender_id == user.id, Message.receiver_id == friend.id
+                    ),
+                    and_(
+                        Message.receiver_id == user.id, Message.sender_id == friend.id
+                    ),
+                )
+            )
+            .order_by(Message.timestamp.desc())
+            .first()
+        )
+
+        messages.append(message)
+
+    return messages
+
+
+def see_messages(messages: list[Message]) -> None:
+    for message in messages:
+        message.seen = True
+        print(message)
+
+    db.session.commit()
