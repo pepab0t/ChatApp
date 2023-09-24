@@ -16,7 +16,7 @@
               <div class="message-wrap">
                 <h3 class="user-name">{{friend['username']}}</h3>
                 {% if friend['last_message']%}
-                  <p class="user-message">{{friend['last_message'].text}}</p>
+                  <p class="user-message">{{friend.last_message.text|short(30)}}</p>
                 {% else %}
                   <p class="user-message">No messages yet.</p>
                 {% endif %}
@@ -24,7 +24,7 @@
           </div>
           <div class="message-info">
             {% if friend['last_message']%}
-          <span class="user-time">18:22 PM</span>
+          <span class="user-time">{{friend.last_message.timestamp}}</span>
           {% else %}
           {% endif %}
         </div>

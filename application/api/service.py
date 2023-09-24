@@ -2,6 +2,7 @@ from flask_sqlalchemy.pagination import Pagination
 
 from .. import repository
 from ..exceptions import EntityNotFound, Forbidden, InvalidRequestException
+from datetime import datetime
 
 
 def already_friends(user1, user2):
@@ -127,6 +128,18 @@ def add_last_message_to_friend(friend, message_dict):
     return data
 
 
+def sorter(user):
+    def inner(item):
+        if not (lm := item["last_message"]):
+            return (False, datetime.min)
+        return (
+            lm["seen"] if user.id == lm["receiver"]["id"] else True,
+            datetime.strptime(lm["timestamp"], r"%H:%M %d.%m.%Y"),
+        )
+
+    return inner
+
+
 def get_friends(user_id: int, page: int | None = None):
     ### ADD SORTING FRIENDS BY NEWEST MESSAGES
 
@@ -149,6 +162,11 @@ def get_friends(user_id: int, page: int | None = None):
         item = friend.dict()
         item["last_message"] = message.dict() if message else dict()
         data.append(item)
+
+    data.sort(
+        key=sorter(user),
+        reverse=False,
+    )
 
     if isinstance(friends, Pagination):
         return {"page": friends.page, "pages": friends.pages, "data": data}, 200
