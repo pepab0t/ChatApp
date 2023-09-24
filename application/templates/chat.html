@@ -37,43 +37,11 @@
         name="chat-input"
         id="message-input"
       ></textarea>
-      <button type="submit">Send</button>
+      <button type="submit" id="submit-button">Send</button>
     </form>
   </div>
-</div>
-{%endblock%}
 
-{% block script %}
-<script>
-  
-  const content = document.getElementById("content");
-  const messageForm = document.getElementById("message-form");
-  const messageInput = document.getElementById("message-input");
-  const messageContainer = document.querySelector(".messages-window");
-  
-  function scrollBottom(){
-    messageContainer.scrollTop = messageContainer.scrollHeight;
-  }
-
-
-  var socketio = io();
-  socketio.on("connect", function() {
-      socketio.emit("join_room", {room: "{{room}}"})
-  })
-
-  socketio.on("disconnect", function() {
-      socketio.emit("leave_room", {room: "{{room}}"})
-  })
-
-  const sendMessage = () => {
-    const message = messageInput.value;
-
-    if (!message){
-      console.log(message)
-      return false;
-    } 
-
-    fetch("{{ get_url('api.send_message', username='__var1__') }}".replace("__var1__", '{{with_user}}'), {
+    <!-- fetch("{{ get_url('api.send_message', username='__var1__') }}".replace("__var1__", '{{with_user}}'), {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -88,13 +56,53 @@
       return response.json()
     })
     .then(json => {
-        json.room = "{{room}}";
+        json.room = room;
         console.log(json);
         socketio.emit("message", json)
         messageInput.value = ""
     })
-    .catch(error => console.log(error))
+    .catch(error => console.log(error)) -->
+</div>
+{%endblock%}
 
+{% block script %}
+<script>
+  
+  const content = document.getElementById("content");
+  const messageForm = document.getElementById("message-form");
+  const messageInput = document.getElementById("message-input");
+  const messageContainer = document.querySelector(".messages-window");
+  const submitBtn = document.getElementById("submit-button");
+
+  const room = "{{room}}";
+
+  document.onkeydown = (e) => {
+    console.log(e.keyCode)
+    if (e.keyCode == 13) {
+      sendMessage()
+    }
+  }
+  
+  function scrollBottom(){
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+  }
+
+
+  var socketio = io(window.location.origin);
+  socketio.on("connect", function() {
+      socketio.emit("join_room", {room: room})
+  })
+
+  socketio.on("disconnect", function() {
+      socketio.emit("leave_room", {room: room})
+  })
+
+  const sendMessage = () => {
+    const message = messageInput.value;
+    if (message){
+      socketio.emit("message", {message: message, room: room, with_user: "{{with_user}}" });
+      messageInput.value = null;
+    } 
     return false;
   }
 

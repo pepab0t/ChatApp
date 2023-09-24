@@ -9,6 +9,7 @@ from . import service
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
+
 @api.get("/test")
 @token_valid()
 def test():
@@ -74,9 +75,12 @@ def search(user_id: int):
 @token_valid()
 def send_message(user_id: int, username: str):
     message = request.get_json().get("message", None)
+    seen = request.get_json().get("seen", None)
     if message is None:
         raise InvalidRequestException("Missing json body key `message`")
-    result, code = service.send_message(user_id, username, message)
+    if seen is None:
+        raise InvalidRequestException("Missing json body key `seen`")
+    result, code = service.send_message(user_id, username, message, seen)
     return jsonify(result), code
 
 

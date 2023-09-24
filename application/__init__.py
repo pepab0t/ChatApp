@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, request, url_for
 import os
 from flask_socketio import SocketIO, send, join_room, leave_room
 from dotenv import load_dotenv
+import requests
 
 load_dotenv()
 
@@ -12,6 +13,10 @@ from .error_handlers import (
     handle_entity_404,
     handle_chat_app_exception,
 )
+
+
+def get_url(endpoint: str, **path_params):
+    return f"{request.host_url}{url_for(endpoint, **path_params)}"
 
 
 def create_flask(db_uri: str):
@@ -62,9 +67,22 @@ def create_app(db_uri):
 
     @socket.on("message")
     def message(data):
+        # len(socket.server.manager.rooms["/"]["R1"])
         room = data.get("room")
-        if room is None:
+        message = data.get("message")
+        if room is None or message is None or not message.strip():
             return
-        send(data, to=room)
+
+        response = requests.post(
+            get_url("api.send_message", username=data.get("with_user")),
+            json={
+                "message": message,
+                "seen": len(socket.server.manager.rooms["/"][room]) > 1,
+            },
+            cookies=request.cookies.to_dict(),
+            headers={},
+        )
+        if response.ok:
+            send(response.json(), to=room)
 
     return socket, app

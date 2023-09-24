@@ -104,8 +104,8 @@ def search(user_id: int, text: str, exclude_friends: bool, page: int | None = No
     }, 200  ### ENDED HERE
 
 
-def send_message(user_id: int, username: str, text: str):
-    if text == "":
+def send_message(user_id: int, username: str, text: str, seen: bool):
+    if text.strip() == "":
         raise InvalidRequestException("Message cannot be empty")
     if (sender := repository.get_user_by_id(user_id)) is None:
         raise EntityNotFound(f"User ID `{user_id}` not found")
@@ -115,7 +115,7 @@ def send_message(user_id: int, username: str, text: str):
     if not already_friends(sender, receiver):
         raise InvalidRequestException("Users are not friends")
 
-    message = repository.create_message(sender, receiver, text)
+    message = repository.create_message(sender, receiver, text, seen)
     return message.dict(), 201
 
 
@@ -133,7 +133,7 @@ def get_friends(user_id: int, page: int | None = None):
         raise EntityNotFound(f"User ID `{user_id}` not found")
 
     if page is None:
-        friends = user.friends
+        friends = sorted(user.friends)
     else:
         friends = repository.get_friends_paginate(user, page)
 
