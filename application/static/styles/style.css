@@ -40,7 +40,9 @@ strong {
 a {
   color: #c7c7c7;
   font-weight: 500;
+  text-decoration: none;
 }
+
 label {
   display: block;
   font-weight: 400;
@@ -362,7 +364,7 @@ button:hover {
   display: flex;
   justify-content: center;
   gap: 20px;
-  padding: 20px;
+  padding: 0 20px 20px 20px;
   align-items: center;
 }
 
@@ -382,19 +384,19 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 auto;
+  margin: 10px auto;
+  background-color: #f1f3f3;
+  border-radius: 12px;
+  transition: all .2s ease-in-out;
+  color: #707070;
+
 }
 
-.user-info--messages {
-  padding: 15px 40px;
-  max-width: 1200px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 20px auto 0 auto;
-  border: 2px solid gainsboro;
-  border-radius: 30px;
+.user-info:hover {
+  transform: scale(1.01);
+  background-color: #e7e7e7;
 }
+
 
 .user-info--left {
   padding: 15px 40px;
@@ -407,6 +409,12 @@ button:hover {
 .user-info--notactive {
   background-color: #f1f3f3;
   border-radius: 12px;
+}
+
+.user-info--noresult {
+  background-color: #f1f3f3;
+  border-radius: 12px;
+  justify-content: center;
 }
 
 .user-photo {
@@ -481,6 +489,7 @@ button:hover {
   gap: 30px;
   align-items: center;
   margin-top: 10px;
+  padding-right: 30px;
 }
 
 .chat-input {
@@ -491,15 +500,17 @@ button:hover {
 /*messages-list*/
 .messages-container {
   width: 100%;
-  margin: 90px 0 0 0;
+  margin: 90px 30px 0 30px;
 }
 
 .main-title {
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .user-group {
   display: flex;
+  align-items: center;
 }
 
 .user-group--search {
@@ -512,6 +523,7 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 6px;
+  color: #707070;
 }
 
 .user-group--search-navbar {
@@ -581,5 +593,7 @@ input[type="search"]:focus {
 }
 
 .unseen-background {
-  background-color: lightgreen;
+  border: 2px solid #707070;
+  font-weight: bold;
+  color: #707070;
 }

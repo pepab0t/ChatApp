@@ -100,7 +100,7 @@
     const message = messageInput.value;
     if (message){
       socketio.emit("message", {message: message, room: room, with_user: "{{with_user}}" });
-      messageInput.value = null;
+      messageInput.value = '';
     } 
     return false;
   }
