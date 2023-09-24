@@ -26,9 +26,9 @@ def create_users():
         u3 = {"username": "user3", "email": "user3@test.com", "password": "1234"}
         users.append(models.User(**UserRegisterEntity(**pepa).dict()))
         users.append(models.User(**UserRegisterEntity(**eliska).dict()))
-        # users.append(models.User(**UserRegisterEntity(**u1).dict()))
-        # users.append(models.User(**UserRegisterEntity(**u2).dict()))
-        # users.append(models.User(**UserRegisterEntity(**u3).dict()))
+        users.append(models.User(**UserRegisterEntity(**u1).dict()))
+        users.append(models.User(**UserRegisterEntity(**u2).dict()))
+        users.append(models.User(**UserRegisterEntity(**u3).dict()))
 
         db.session.add_all(users)
         db.session.commit()
