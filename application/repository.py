@@ -88,6 +88,10 @@ def get_user_by_id(id: int):
     return User.query.get(id)
 
 
+def get_friends(user: User):
+    user.query.filter()
+
+
 def get_friends_paginate(user: User, page):
     query = user.query.filter(User.friends.any(User.id == user.id))
     return query.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
@@ -127,8 +131,8 @@ def get_users_by_text_exlude_friends(user: User, text: str, page: int | None = N
     return q.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
 
 
-def create_message(sender: User, receiver: User, text: str):
-    message = Message(sender=sender, receiver=receiver, text=text)
+def create_message(sender: User, receiver: User, text: str, seen: bool):
+    message = Message(sender=sender, receiver=receiver, text=text, seen=seen)
     db.session.add(message)
     db.session.commit()
     db.session.refresh(message)
