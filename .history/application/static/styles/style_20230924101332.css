@@ -59,12 +59,11 @@ input, textarea {
   font-size: 16px;
   margin-top: 8px;
   width: 300px;
-  color: #868686;
+  color: #c7c7c7;
   border: 1px solid #e8e8e8;
   background-color: #ffffff;
   padding: 10px 20px;
   border-radius: 10px;
-  resize: none;
 }
 
 input::placeholder {
@@ -80,11 +79,9 @@ button {
   background: linear-gradient(133deg, #D0C3FC 0%, #C397FC 100%);
   box-shadow: 0px 4px 5px 0px #d1cbe4;
   border: none;
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 16px;
   text-transform: uppercase;
   border-radius: 39px;
-  letter-spacing: 0.75px;
   display: flex;
   padding: 12px 39px;
   outline: none;
@@ -251,7 +248,7 @@ button:hover {
   font-size: 40px;
   color: #565656;
   font-weight: 600;
-  margin-top: 30px;
+  margin-top: 70px;
 }
 
 .sign__subtitle {
@@ -278,6 +275,9 @@ button:hover {
 }
 
 /*chat styles*/
+.chat-window {
+  display: flex;
+}
 
 .sidebar {
   background-color: #74EBD5;
@@ -347,10 +347,10 @@ button:hover {
 }
 
 .user-header {
-  height: 50px;
-  background-color: #ffffff;
+  height: 90px;
+  background-color: #d5d5d5;
   margin-top: 50px;
-  width: 100%;
+  flex: 1;
   padding: 0 20px;
   position: fixed;
   display: flex;
@@ -373,7 +373,7 @@ button:hover {
   flex-direction: column;
   justify-content: end;
   flex: 1;
-  padding: 100px 0px 20px 50px;
+  padding: 100px 50px 20px 50px;
 }
 
 .user-info {
@@ -385,37 +385,12 @@ button:hover {
   margin: 0 auto;
 }
 
-.user-info--messages {
-  padding: 15px 40px;
-  max-width: 1200px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 20px auto 0 auto;
-  border: 2px solid gainsboro;
-  border-radius: 30px;
-}
-
-.user-info--left {
-  padding: 15px 40px;
-  max-width: 1200px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .user-info--notactive {
   background-color: #f1f3f3;
   border-radius: 12px;
 }
 
 .user-photo {
-  max-width: 30px;
-  margin-right: 20px;
-}
-
-
-.user-photo--big {
   max-width: 50px;
   margin-right: 20px;
 }
@@ -460,7 +435,6 @@ button:hover {
   display: flex;
   flex-direction: column;
   padding-bottom: 50px;
-  padding-right: 50px;
   overflow-y: scroll;
 }
 
@@ -480,7 +454,7 @@ button:hover {
   display: flex;
   gap: 30px;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 50px;
 }
 
 .chat-input {
@@ -491,7 +465,7 @@ button:hover {
 /*messages-list*/
 .messages-container {
   width: 100%;
-  margin: 90px 0 0 0;
+  margin: 61px 0 0 0;
 }
 
 .main-title {
@@ -516,9 +490,10 @@ button:hover {
 
 .user-group--search-navbar {
   justify-content: flex-end;
-  padding: 10px 50px 10px 0;
+  margin-right: 50px;
+  padding: 15px;
   font-size: 14px;
-  background-color: #f1f3f3;
+  background-color: white;
 }
 
 .user-time {

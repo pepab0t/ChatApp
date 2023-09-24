@@ -3,23 +3,23 @@
   <div class="user-header">
     <div class="user-info--left">
       <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo" />
-      <h4 class="user-name">Chatting with {{with_user}}</h4>
+      <h4 class="user-name">{{with_user}}</h4>
     </div>
   </div>
   <div class="chat-window">
     <div class="messages-window" id="content">
 
       <!-- friends message -->
-      <!-- <div class="message-wrapper">
+      <div class="message-wrapper">
         <div class="message-header">
           <span class="message-time"> 11:01 </span>
           <span class="message-sender">{{with_user.username}}</span>
         </div>
         <div class="message-bubble">Hello I have to tell you something</div>
-      </div> -->
+      </div>
 
       <!-- my message -->
-      <!-- <div class="message-wrapper--second">
+      <div class="message-wrapper--second">
         <div class="message-header">
           <span class="message-time"> 11:01 </span>
           <span class="message-sender"> You </span>
@@ -27,7 +27,7 @@
         <div class="message-bubble--second">
           Hello I have to tell you something
         </div>
-      </div> -->
+      </div>
 
     </div>
     <form class="chat-wrapper" id="message-form">

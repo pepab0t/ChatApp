@@ -64,7 +64,6 @@ input, textarea {
   background-color: #ffffff;
   padding: 10px 20px;
   border-radius: 10px;
-  resize: none;
 }
 
 input::placeholder {
@@ -251,7 +250,7 @@ button:hover {
   font-size: 40px;
   color: #565656;
   font-weight: 600;
-  margin-top: 30px;
+  margin-top: 70px;
 }
 
 .sign__subtitle {
