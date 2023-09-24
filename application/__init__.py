@@ -43,6 +43,12 @@ def create_flask(db_uri: str):
 
     app.jinja_env.globals.update(get_url=get_url)
 
+    @app.template_filter()
+    def short(text: str, max_len: int):
+        if len(text) > max_len:
+            return text[:max_len] + "..."
+        return text
+
     return app
 
 

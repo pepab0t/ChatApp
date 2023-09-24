@@ -3,31 +3,11 @@
   <div class="user-header">
     <div class="user-info--left">
       <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo" />
-      <h4 class="user-name">Chatting with {{with_user}}</h4>
+      <h4 class="user-name">Chatting with: <strong>{{with_user}}</strong></h4>
     </div>
   </div>
   <div class="chat-window">
     <div class="messages-window" id="content">
-
-      <!-- friends message -->
-      <!-- <div class="message-wrapper">
-        <div class="message-header">
-          <span class="message-time"> 11:01 </span>
-          <span class="message-sender">{{with_user.username}}</span>
-        </div>
-        <div class="message-bubble">Hello I have to tell you something</div>
-      </div> -->
-
-      <!-- my message -->
-      <!-- <div class="message-wrapper--second">
-        <div class="message-header">
-          <span class="message-time"> 11:01 </span>
-          <span class="message-sender"> You </span>
-        </div>
-        <div class="message-bubble--second">
-          Hello I have to tell you something
-        </div>
-      </div> -->
 
     </div>
     <form class="chat-wrapper" id="message-form">
@@ -40,28 +20,6 @@
       <button type="submit" id="submit-button">Send</button>
     </form>
   </div>
-
-    <!-- fetch("{{ get_url('api.send_message', username='__var1__') }}".replace("__var1__", '{{with_user}}'), {
-        method: "POST",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({message: message})
-    })
-    .then(response => {
-      if (!response.ok){
-        throw new Error(response.text());
-      }
-      return response.json()
-    })
-    .then(json => {
-        json.room = room;
-        console.log(json);
-        socketio.emit("message", json)
-        messageInput.value = ""
-    })
-    .catch(error => console.log(error)) -->
 </div>
 {%endblock%}
 

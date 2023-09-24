@@ -19,7 +19,7 @@
 
   <div id="list">
 
-    <div class="message-tab">
+    <!-- <div class="message-tab">
       <div class="user-info">
         <div class="user-group--search">
           <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo" />
@@ -45,7 +45,7 @@
           <p class="friends-notactive">Your friend</p>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class="message-tab">
       <div class="user-info user-info--noresult">
@@ -79,6 +79,19 @@
         })
         .then(response => console.log(response))
         .catch(error => console.log(error))
+    }
+
+    const displayEmpty = () => {
+      const itemDiv = document.createElement("div");
+      itemDiv.classList.add("message-tab");
+      itemDiv.innerHTML = `
+      <div class="user-info user-info--noresult">
+        <div class="message-info">
+          <p>No results.</p>
+        </div>
+      </div>
+      `
+      list.append(itemDiv);
     }
 
     
@@ -129,7 +142,12 @@
             return response.json()})
         .then(data => {
             console.log(data);
-            data.data.forEach(displayResult);
+            
+            if (data.data.length > 0){
+              data.data.forEach(displayResult);
+            } else {
+              displayEmpty();
+            }
             let li = document.createElement("li");
             li.innerHTML = `pages: ${data.pages} page: ${data.page}`;
             list.append(li);
