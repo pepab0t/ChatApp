@@ -97,7 +97,11 @@ def search(user_id: int, text: str, exclude_friends: bool, page: int | None = No
         page_ = None
         pages_ = None
 
-    return {"page": page_, "pages": pages_, "data": [u.dict() for u in users]}, 200  ### ENDED HERE
+    return {
+        "page": page_,
+        "pages": pages_,
+        "data": [u.dict() for u in users],
+    }, 200  ### ENDED HERE
 
 
 def send_message(user_id: int, username: str, text: str):
@@ -115,6 +119,12 @@ def send_message(user_id: int, username: str, text: str):
     return message.dict(), 201
 
 
+def add_last_message_to_friend(friend, message_dict):
+    data = friend.dict()
+    data["last_message"] = message_dict or None
+    return data
+
+
 def get_friends(user_id: int, page: int | None = None):
     ### ADD SORTING FRIENDS BY NEWEST MESSAGES
 
@@ -127,7 +137,17 @@ def get_friends(user_id: int, page: int | None = None):
     else:
         friends = repository.get_friends_paginate(user, page)
 
-    data = list(map(lambda friend: friend.dict(), friends))
+    message = repository.get_last_message(user, friends[0])
+
+    data = list(
+        map(
+            lambda friend: add_last_message_to_friend(
+                friend, message.dict() if message else {}
+            ),
+            friends,
+        )
+    )
+
     if isinstance(friends, Pagination):
         return {"page": friends.page, "pages": friends.pages, "data": data}, 200
     return {"page": None, "pages": None, "data": data}, 200
@@ -156,6 +176,5 @@ def get_messages(user_id: int, friend_username: str, page: int | None = None):
     data = map(lambda m: m.dict(), messages)
     if isinstance(messages, Pagination):
         return {"page": page, "pages": messages.pages, "data": list(data)}, 200
-    
-    return {"page": None, "pages": None, "data": list(data)}, 200
 
+    return {"page": None, "pages": None, "data": list(data)}, 200

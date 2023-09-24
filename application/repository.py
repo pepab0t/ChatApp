@@ -66,7 +66,9 @@ def get_all_pending_requests_received(user_id: int, page: int | None = None):
     if user is None:
         return None
 
-    query = Request.query.filter(Request.accepted == None, Request.receiver_id == user_id).order_by(Request.timestamp.desc())
+    query = Request.query.filter(
+        Request.accepted == None, Request.receiver_id == user_id
+    ).order_by(Request.timestamp.desc())
 
     if page is None:
         return query.all()
@@ -84,6 +86,7 @@ def get_opened_request_by_id(id: int):
 
 def get_user_by_id(id: int):
     return User.query.get(id)
+
 
 def get_friends_paginate(user: User, page):
     query = user.query.filter(User.friends.any(User.id == user.id))
@@ -165,9 +168,19 @@ def get_messages(user: User, friend: User, page: int | None = None):
                 Message.receiver.has(id=friend.id),
             )
         )
-        .order_by(Message.timestamp.desc())
+        .order_by(Message.timestamp)  # .desc()
     )
 
     if page is None:
         return messages.all()
     return messages.paginate(page=page, per_page=MESSAGES_PER_PAGE, error_out=True)
+
+
+def get_last_message(user: User, friend: User) -> Message | None:
+    # user.messages_received
+    messages = list(filter(lambda m: m.receiver == friend, user.messages_sent)) + list(
+        filter(lambda m: m.sender == friend, user.messages_received)
+    )
+    if not messages:
+        return None
+    return sorted(messages, key=lambda m: m.timestamp, reverse=True)[0]
