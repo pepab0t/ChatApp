@@ -59,12 +59,11 @@ input, textarea {
   font-size: 16px;
   margin-top: 8px;
   width: 300px;
-  color: #868686;
+  color: #c7c7c7;
   border: 1px solid #e8e8e8;
   background-color: #ffffff;
   padding: 10px 20px;
   border-radius: 10px;
-  resize: none;
 }
 
 input::placeholder {
@@ -84,7 +83,7 @@ button {
   font-weight: bold;
   text-transform: uppercase;
   border-radius: 39px;
-  letter-spacing: 0.75px;
+  letter-spacing: 1.5px;
   display: flex;
   padding: 12px 39px;
   outline: none;
@@ -251,7 +250,7 @@ button:hover {
   font-size: 40px;
   color: #565656;
   font-weight: 600;
-  margin-top: 30px;
+  margin-top: 70px;
 }
 
 .sign__subtitle {
@@ -383,17 +382,6 @@ button:hover {
   align-items: center;
   justify-content: space-between;
   margin: 0 auto;
-}
-
-.user-info--messages {
-  padding: 15px 40px;
-  max-width: 1200px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 20px auto 0 auto;
-  border: 2px solid gainsboro;
-  border-radius: 30px;
 }
 
 .user-info--left {
