@@ -49,7 +49,13 @@
   const content = document.getElementById("content");
   const messageForm = document.getElementById("message-form");
   const messageInput = document.getElementById("message-input");
+  const messageContainer = document.querySelector(".messages-window");
   
+  function scrollBottom(){
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+  }
+
+
   var socketio = io();
   socketio.on("connect", function() {
       socketio.emit("join_room", {room: "{{room}}"})
@@ -110,7 +116,10 @@
 
   socketio.on("message", data => {
     console.log(data)
-    createMessage(data)})
+    createMessage(data);
+    scrollBottom();
+  })
+
   messageForm.onsubmit = sendMessage;
 
 </script>
@@ -119,6 +128,7 @@
   fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}") + new URLSearchParams())
   .then(response => response.json())
   .then(json => json.data.forEach(message => createMessage(message)))
+  .then(scrollBottom)
   .catch(error => console.log(error))
 </script>
 {% endblock %}
