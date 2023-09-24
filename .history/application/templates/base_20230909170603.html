@@ -23,14 +23,10 @@
   </head>
   <body>
     <nav class="navbar"> 
-      <div class="user-group--search user-group--search-navbar ">
-        <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo user-photo--navbar " />
+      <div class="user-group--search">
+        <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo" />
         <div class="message-wrap">
-          <p class="user-name">user1</p>
-        </div>
-        <div class="logout">
-           <img src="{{ url_for('static', filename='images/shutdown.png')}}" alt="" class="shutdown" />
-        <span>Log out</span>
+          <h3 class="user-name">James Doe</h3>
         </div>
       </div>
     </nav>
@@ -58,7 +54,7 @@
             />
             Search
             </a>
-            <a class="sidebar-icon" href="{{ url_for('views.friend_requests') }}">
+            <a href="{{ url_for('views.friend_requests') }}">
               <img
               class="sidebar-image"
               src="{{ url_for('static', filename='images/user-icon.png')}}"
@@ -67,6 +63,14 @@
               Requests
             </a>
           </div>
+
+          <a class="sidebar-logout" href="{{ url_for('views.logout') }}">
+            <img
+            class="sidebar-image"
+            src="{{ url_for('static', filename='images/logout.png')}}"
+            alt=""
+          />
+          Logout</a>
         </div>
         {% endif %}
         {% block body %} {% endblock%}
