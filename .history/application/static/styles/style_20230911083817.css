@@ -127,7 +127,7 @@ button:hover {
   border-radius: 25px;
   width: 1000px;
   height: 650px;
-  margin: auto 15px auto 15px;
+  margin: auto;
 }
 
 .log {
@@ -150,10 +150,6 @@ button:hover {
   color: #414141;
   display: flex;
   border-radius: 20px;
-
-  @media only screen and (max-width: 680px) {
-   flex-direction: column;
-  }
 }
 
 .background {
@@ -352,9 +348,6 @@ button:hover {
   flex: 1;
   padding: 0 20px;
   position: fixed;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #d5d5d5;
 }
 
 .chat-window {
@@ -364,7 +357,14 @@ button:hover {
   flex-direction: column;
   justify-content: end;
   flex: 1;
-  padding: 100px 50px 20px 50px;
+  padding: 110px 50px 20px 50px;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid #d5d5d5;
 }
 
 .user-info {
@@ -445,7 +445,7 @@ button:hover {
   display: flex;
   gap: 30px;
   align-items: center;
-  margin-top: 50px;
+  margin-top: 20px;
 }
 
 .chat-input {
@@ -484,8 +484,107 @@ button:hover {
   margin-right: 50px;
   padding: 15px;
   font-size: 14px;
-  background-color: white;
 }
+
+
+.tb {
+  display: table;
+  width: 100%;
+}
+
+.td {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+input,
+button {
+  color: #fff;
+  font-family: Nunito;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background-color: transparent;
+}
+
+#cover {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  width: 550px;
+  padding: 35px;
+  margin: -83px auto 0 auto;
+  background-color: #ff7575;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px #ff7c7c, 0 0 0 20px #ffffffeb;
+  transform: scale(0.6);
+}
+
+form {
+  height: 96px;
+}
+
+input[type="text"] {
+  width: 100%;
+  height: 96px;
+  font-size: 60px;
+  line-height: 1;
+}
+
+input[type="text"]::placeholder {
+  color: #e16868;
+}
+
+#s-cover {
+  width: 1px;
+  padding-left: 35px;
+}
+
+button {
+  position: relative;
+  display: block;
+  width: 84px;
+  height: 96px;
+  cursor: pointer;
+}
+
+#s-circle {
+  position: relative;
+  top: -8px;
+  left: 0;
+  width: 43px;
+  height: 43px;
+  margin-top: 0;
+  border-width: 15px;
+  border: 15px solid #fff;
+  background-color: transparent;
+  border-radius: 50%;
+  transition: 0.5s ease all;
+}
+
+button span {
+  position: absolute;
+  top: 68px;
+  left: 43px;
+  display: block;
+  width: 45px;
+  height: 15px;
+  background-color: transparent;
+  border-radius: 10px;
+  transform: rotateZ(52deg);
+  transition: 0.5s ease all;
+}
+
+button span:before,
+button span:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 45px;
+  height: 15px;
+  backgrou
 
 .user-time {
   margin-right: 15px;

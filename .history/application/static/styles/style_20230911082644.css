@@ -127,7 +127,7 @@ button:hover {
   border-radius: 25px;
   width: 1000px;
   height: 650px;
-  margin: auto 15px auto 15px;
+  margin: auto;
 }
 
 .log {
@@ -150,10 +150,6 @@ button:hover {
   color: #414141;
   display: flex;
   border-radius: 20px;
-
-  @media only screen and (max-width: 680px) {
-   flex-direction: column;
-  }
 }
 
 .background {
@@ -352,9 +348,6 @@ button:hover {
   flex: 1;
   padding: 0 20px;
   position: fixed;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #d5d5d5;
 }
 
 .chat-window {
@@ -364,7 +357,14 @@ button:hover {
   flex-direction: column;
   justify-content: end;
   flex: 1;
-  padding: 100px 50px 20px 50px;
+  padding: 110px 50px 20px 50px;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid #d5d5d5;
 }
 
 .user-info {
@@ -445,7 +445,7 @@ button:hover {
   display: flex;
   gap: 30px;
   align-items: center;
-  margin-top: 50px;
+  margin-top: 20px;
 }
 
 .chat-input {
@@ -484,7 +484,6 @@ button:hover {
   margin-right: 50px;
   padding: 15px;
   font-size: 14px;
-  background-color: white;
 }
 
 .user-time {
