@@ -15,22 +15,21 @@
         alt="Phone"
       />
       <p class="info__content info__content--register">
-        Discrover new friends, connect with people,<br />
-        make new memories!
+        Discrover new friends and connect with people!
       </p>
     </div>
     <div class="sign__screen">
       <div class="sign__title">Sign Up</div>
-      <div class="sign__subtitle">Have an account? <a href="">Log in</a></div>
+      <div class="sign__subtitle">Have an account? <a href="{{ get_url('views.login')}}">Log in</a></div>
       <form class="sign__form" action="">
         <label>Email</label>
         <input type="text" placeholder="johndoe@example.com" />
         <label class="sign__label">Username</label>
         <input type="text" placeholder="John Doe" />
         <label class="sign__label">Password</label>
-        <input type="text" label="password" />
+        <input type="password" label="password" />
         <label class="sign__label">Confirm password</label>
-        <input type="text" label="confirm password" />
+        <input type="password" label="confirm password" />
         <button class="sign__button" type="submit">Create account</button>
       </form>
     </div>
