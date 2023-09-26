@@ -15,7 +15,7 @@ def register_user(user: UserRegisterEntity):
     try:
         db.session.commit()
     except IntegrityError as e:
-        raise DatabaseError(e.args[0], 422)
+        raise DatabaseError("Username or email already exists", 422)
 
     db.session.refresh(new_user)
     del new_user.password
