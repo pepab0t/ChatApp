@@ -53,17 +53,26 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
 
-    username = request.form.get("username")
-    password = request.form.get("password")
-    if username is None or password is None:
-        return render_template("new/login.html")
+    username = request.form.get("username", "")
+    password = request.form.get("password", "")
+    if username == "" or password == "":
+        print("asdada")
+        return render_template(
+            "login.html",
+            message_username="Please enter username and password",
+            username=username,
+        )
 
     auth = "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode()
 
     response = requests.post(get_url("auth.login"), headers={"Authorization": auth})
 
     if not response.ok:
-        return render_template("login.html")
+        return render_template(
+            "login.html",
+            message_username="Invalid username or password",
+            username=username,
+        )
 
     data = response.json()
     session["user_id"] = data["id"]
@@ -84,11 +93,25 @@ def register():
     if request.method == "GET":
         return render_template("register.html")
 
-    username = request.form.get("username")
-    email = request.form.get("email")
-    password = request.form.get("password")
-    if any(map(lambda x: x is None, [username, email, password])):
-        return render_template("register.html")
+    username = request.form.get("username", "")
+    email = request.form.get("email", "")
+    password = request.form.get("password", "")
+    password2 = request.form.get("password2", "")
+    if any(map(lambda x: x == "", [username, email, password, password2])):
+        return render_template(
+            "register.html",
+            username=username,
+            email=email,
+            message_email="Please enter all necessary information",
+        )
+
+    if password != password2:
+        return render_template(
+            "register.html",
+            username=username,
+            email=email,
+            message_password="Passwords don't match",
+        )
 
     response = requests.post(
         get_url("auth.register"),
@@ -96,7 +119,13 @@ def register():
     )
 
     if not response.ok:
-        return render_template("register.html")
+        data = response.json()
+        return render_template(
+            "register.html",
+            message_email=data.get("message"),
+            username=username,
+            email=email,
+        )
 
     user = response.json()
 
@@ -124,7 +153,8 @@ def logout():
     response = make_response(redirect_login())
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
-    del session["user_id"]
+    if "user_id" in session:
+        del session["user_id"]
     return response
 
 

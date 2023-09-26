@@ -29,9 +29,15 @@
         action="{{ get_url('views.login') }}"
       >
         <label>Username</label>
-        <input type="text" placeholder="john.doe@gmail.com" name="username" />
+        <input type="text" placeholder="john.doe@gmail.com" name="username" value="{{username}}"/>
+        {% if message_username %}
+          <p class="valid-alert">{{message_username}}</p>
+        {% endif %}
         <label class="sign__label">Password</label>
         <input type="password" label="password" name="password" />
+        {% if message_password %}
+          <p class="valid-alert">{{message_password}}</p>
+        {% endif %}
         <button class="sign__button" type="submit">Log in</button>
       </form>
     </div>

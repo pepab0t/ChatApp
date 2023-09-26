@@ -435,6 +435,7 @@ button:hover {
 
 .message-wrapper {
   padding-bottom: 10px;
+  width: 70%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -446,12 +447,12 @@ button:hover {
 
 .message-wrapper--second {
   padding-bottom: 10px;
+  width: 70%;
+  text-align: left;
   align-self: end;
-  width: 40%;
-  text-align: right;
-  display: flex;
   flex-direction: column;
   align-items: flex-end;
+  display: flex;
 }
 
 .message-bubble {
@@ -482,6 +483,21 @@ button:hover {
     rgba(0, 0, 0, 0.01) 0px 4px 6px -2px;
   color: white;
   display: inline;
+
+}
+
+.message-bubble--second p {
+  max-width: 700px;
+  word-break: break-all;
+  white-space: normal;
+
+}
+
+.message-bubble p {
+  max-width: 700px;
+  word-break: break-all;
+  white-space: normal;
+
 }
 
 .chat-wrapper {
@@ -596,4 +612,11 @@ input[type="search"]:focus {
   border: 2px solid #707070;
   font-weight: bold;
   color: #707070;
+}
+
+.valid-alert {
+  margin-top: 5px;
+  font-size: 13px;
+  color: red;
+  max-width: 300px;
 }
