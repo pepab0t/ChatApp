@@ -15,7 +15,7 @@ def register():
 @auth.route("/login", methods=["POST"])
 def login():
     auth = request.authorization
-    payload, code = service.login(auth)
+    payload, code = service.login(auth)  # type: ignore
     response = make_response(jsonify(payload), code)
     response.set_cookie("access_token", payload["access"], httponly=True)
     response.set_cookie("refresh_token", payload["refresh"], httponly=True)

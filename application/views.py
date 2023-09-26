@@ -11,7 +11,7 @@ from flask import (
     url_for,
 )
 
-from . import repository, get_url
+from . import repository, get_url, auth
 
 views = Blueprint("views", __name__)
 
@@ -63,9 +63,15 @@ def login():
             username=username,
         )
 
-    auth = "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode()
+    authorization = (
+        "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode()
+    )
 
-    response = requests.post(get_url("auth.login"), headers={"Authorization": auth})
+    response = requests.post(
+        get_url("auth.login"), headers={"Authorization": authorization}
+    )
+
+    # auth.login(auth.AuthTuple(username=username, password=password))
 
     if not response.ok:
         return render_template(
