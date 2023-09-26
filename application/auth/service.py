@@ -9,6 +9,12 @@ from ..exceptions import (
 from ..entity import UserLoginEntity, UserRegisterEntity, ValidationError
 from . import utils
 from .. import repository
+from typing import NamedTuple
+
+
+class AuthTuple(NamedTuple):
+    username: str
+    password: str
 
 
 def prepare_validation_error(err: ValidationError):
@@ -28,7 +34,7 @@ def register(body):
     return repository.register_user(user).dict(), 201
 
 
-def login(auth):
+def login(auth: AuthTuple | None):
     if auth is None:
         raise Unauthenticated()
 
