@@ -1,0 +1,104 @@
+{% extends 'base.html'%} {% block body%}
+<div class="chat-container">
+  <div class="user-header">
+    <div class="user-info--left">
+      <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo" />
+      <h4 class="user-name">Chatting with: <strong>{{with_user}}</strong></h4>
+    </div>
+  </div>
+  <div class="chat-window">
+    <div class="messages-window" id="content">
+
+    </div>
+    <form class="chat-wrapper" id="message-form">
+      <textarea
+        placeholder="Say hello to your friend..."
+        class="chat-input"
+        name="chat-input"
+        id="message-input"
+      ></textarea>
+      <button type="submit" id="submit-button">Send</button>
+    </form>
+  </div>
+</div>
+{%endblock%}
+
+{% block script %}
+<script>
+  
+  const content = document.getElementById("content");
+  const messageForm = document.getElementById("message-form");
+  const messageInput = document.getElementById("message-input");
+  const messageContainer = document.querySelector(".messages-window");
+  const submitBtn = document.getElementById("submit-button");
+
+  const room = "{{room}}";
+
+  document.onkeydown = (e) => {
+    if (e.keyCode == 13) {
+      sendMessage()
+    }
+  }
+  
+  function scrollBottom(){
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+  }
+
+
+  var socketio = io(window.location.origin);
+  socketio.on("connect", function() {
+      socketio.emit("join_room", {room: room})
+  })
+
+  socketio.on("disconnect", function() {
+      socketio.emit("leave_room", {room: room})
+  })
+
+  const sendMessage = () => {
+    const message = messageInput.value;
+    if (message){
+      socketio.emit("message", {message: message, room: room, with_user: "{{with_user}}" });
+      messageInput.value = '';
+    } 
+    return false;
+  }
+
+  const createMessage = ({text, sender, timestamp}) => {
+      const isMe = sender.id == "{{user.id}}";
+      console.log(sender.id)
+      const second = isMe ? '--second': ''
+      const message = document.createElement('div');
+      message.classList.add(`message-wrapper${second}`)
+      message.innerHTML = `
+<div class="message-header">
+  <span class="message-time"> ${timestamp} </span>
+</div>
+<div class="message-bubble${second}">
+  <p>
+    ${text}
+  </p>
+</div>`
+      content.append(message)
+  }
+
+  socketio.on("message", data => {
+    console.log(data)
+    createMessage(data);
+    scrollBottom();
+  })
+
+  messageForm.onsubmit = sendMessage;
+
+</script>
+
+<script>
+  fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}") + new URLSearchParams())
+  .then(response => response.json())
+  .then(json => json.data.forEach(message => createMessage(message)))
+  .then(scrollBottom)
+  .catch(error => console.log(error))
+
+  fetch("{{get_url('api.see_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}"))
+    .then(res => console.log(res.status))
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title%} {% endblock%}</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+      integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/style.css') }}"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav></nav>
+    <section class="section">
+      <div class="chat-wrap">
+        {% if nav %}
+        <div class="sidebar">
+          <p class="sidebar-logo">
+            <img src="{{ url_for('static', filename='images/whisper-logo.png')}}"">
+            Whispr</p>
+          <div class="sidebar-menu">
+            <a class="sidebar-icon" href="{{ url_for('views.home')}}">
+              <img
+              class="sidebar-image"
+              src="{{ url_for('static', filename='images/chat-icon.png')}}"
+              alt=""
+            />
+            Chats
+            </a>
+            <a class="sidebar-icon" href="{{ url_for('views.add_friend') }}">
+              <img
+              class="sidebar-image"
+              src="{{ url_for('static', filename='images/search.png')}}"
+              alt=""
+            />
+            Search
+            </a>
+            <a href="{{ url_for('views.friend_requests') }}"><img
+              class="sidebar-image"
+              src="{{ url_for('static', filename='images/user-icon.png')}}"
+              alt=""
+            />
+            Requests
+          </a>
+            <a href="{{ url_for('views.logout') }}">Logout</a>
+          </div>
+        </div>
+        {% endif %}
+        {% block body %} {% endblock%}
+      </div>
+    </section>
+    <script>
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+      }
+    </script>
+    {% block script%} {% endblock%}
+  </body>
+</html>

@@ -1,0 +1,79 @@
+
+{% extends 'base.html'%}
+
+{% block title%}
+Login
+{% endblock %}
+
+{% block body%}
+
+<div class="messages-container">
+    <h1 class="main-title">Friend requests</h1>
+
+    <div id="list">
+        {% for req in requests %}
+        <div class="message-tab request-tab">
+            <div class="user-info">
+                <div class="user-group--search">
+                <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo" />
+                <div class="message-wrap">
+                    <h3 class="user-name">{{req['sender']['username']}}</h3>
+                </div>
+                </div>
+                <div class="button-wrap">
+                    <button onclick="acceptRequest({{req['id']}})">Accept</button> <button onclick="declineRequest({{req['id']}})">Decline</button> 
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% if requests|length == 0 %}
+        <div class="message-tab">
+            <div class="user-info user-info--noresult">
+                <div class="message-info">
+                    <p>No requests yet.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block script %}
+<script>
+    const token = "{{session['token']}}";
+    const acceptRequest = function(rid){
+        console.log(rid);
+        fetch("{{ get_url('api.approve_request') }}" + "?" + new URLSearchParams({
+            request_id: rid
+        }), {
+            method: "POST"
+        })
+        .then( response => {
+            if (response.ok) {
+                window.location.replace( "{{ get_url('views.friend_requests') }}" );   
+            }
+        })
+        .catch( error => console.log(error));
+    }
+    const declineRequest = function(rid){
+        fetch("{{ get_url('api.decline_request') }}" + "?" + new URLSearchParams({
+            request_id: rid
+        }), {
+            method: "POST"
+        })
+        .then( response => {
+            if (response.ok) {
+                window.location.replace( "{{ get_url('views.friend_requests') }}" );   
+            }
+        })
+        .catch( error => console.log(error));
+    }
+
+    console.log("abc")
+
+
+</script>
+{% endblock %}
