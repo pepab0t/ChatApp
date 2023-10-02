@@ -1,0 +1,46 @@
+{% extends 'base.html'%} {% block body%}
+<div class="background" alt=""></div>
+<div class="log-wrapper log-wrapper--register">
+  <div class="log--register">
+    <div class="info-box info-box--register">
+      <div class="info__logo">Whispr</div>
+      <div class="info__description info__description-register">
+        Chat with <br />
+        your <strong>friends</strong><br />
+        around whole <br />world
+      </div>
+      <img
+        class="info__img info__img--register"
+        src="{{ url_for('static', filename='images/phone.png') }}"
+        alt="Phone"
+      />
+      <p class="info__content info__content--register">
+        Discrover new friends and connect with people!
+      </p>
+    </div>
+    <div class="sign__screen">
+      <div class="sign__title">Sign In</div>
+      <div class="sign__subtitle">
+        Dont have an account? <a href="{{ get_url('views.register') }}">Register</a>
+      </div>
+      <form
+        class="sign__form"
+        method="POST"
+        action="{{ get_url('views.login') }}"
+      >
+        <label>Username</label>
+        <input type="text" placeholder="john.doe@gmail.com" name="username" value="{{username}}"/>
+        {% if message_username %}
+          <p class="valid-alert">{{message_username}}</p>
+        {% endif %}
+        <label class="sign__label">Password</label>
+        <input type="password" label="password" name="password" />
+        {% if message_password %}
+          <p class="valid-alert">{{message_password}}</p>
+        {% endif %}
+        <button class="sign__button" type="submit">Log in</button>
+      </form>
+    </div>
+  </div>
+</div>
+{%endblock%}
