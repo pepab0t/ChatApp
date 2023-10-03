@@ -1,9 +1,10 @@
 import base64
-from werkzeug.test import TestResponse
-from application import repository
 import re
 
-from application.entity import UserRegisterEntity
+from werkzeug.test import TestResponse
+
+from application import repository
+from application.auth.entity import UserRegisterEntity
 from application.database.models import User
 
 username = "test"

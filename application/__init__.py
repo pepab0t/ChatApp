@@ -1,17 +1,18 @@
-from flask import Flask, request, url_for
 import os
-from flask_socketio import SocketIO, send, join_room, leave_room
-from dotenv import load_dotenv
+
 import requests
+from dotenv import load_dotenv
+from flask import Flask, request, url_for
+from flask_socketio import SocketIO, join_room, leave_room, send
 
 load_dotenv()
 
-from .database import db, DB_NAME
+from .database import DB_NAME, db
 from .error_handlers import (
-    handle_invalid_body,
+    handle_chat_app_exception,
     handle_database_error,
     handle_entity_404,
-    handle_chat_app_exception,
+    handle_invalid_body,
 )
 
 
@@ -28,9 +29,9 @@ def create_flask(db_uri: str):
 
     db.init_app(app)
 
-    from .auth.controller import auth
     from .api.controller import api
-    from .views import views, get_url
+    from .auth.controller import auth
+    from .views import get_url, views
 
     app.register_blueprint(auth)
     app.register_blueprint(api)
@@ -83,7 +84,7 @@ def create_app(db_uri):
             get_url("api.send_message", username=data.get("with_user")),
             json={
                 "message": message,
-                "seen": len(socket.server.manager.rooms["/"][room]) > 1,
+                "seen": len(socket.server.manager.rooms["/"][room]) > 1,  # type: ignore
             },
             cookies=request.cookies.to_dict(),
             headers={},

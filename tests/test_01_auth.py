@@ -1,12 +1,15 @@
 import os
-from flask import Flask
-from application.database.models import User
-from application.auth import utils as auth_utils
-from application.exceptions import InvalidJWT
-from .helper import AuthAction, email, username, password, parse_cookies
-import pytest
 import time
 from unittest import mock
+
+import pytest
+from flask import Flask
+
+from application.auth import utils as auth_utils
+from application.database.models import User
+from application.exceptions import InvalidJWT
+
+from .helper import AuthAction, email, parse_cookies, password, username
 
 
 def test_jwt_valid():
@@ -38,10 +41,7 @@ def test_invalid_registration(auth: AuthAction):
 
 def test_duplicate_register(auth: AuthAction):
     response = auth.register_fixed()
-    assert (
-        response.status_code == 422
-        and "UNIQUE constraint failed" in response.json["message"]  # type: ignore
-    )
+    assert response.status_code == 422 and "already exists" in response.json["message"]  # type: ignore
 
 
 def test_valid_login(auth: AuthAction):

@@ -1,18 +1,18 @@
 from .helper import (
-    DBAction,
     AuthAction,
+    DBAction,
+    code_ok,
+    code_ok_response,
+    repository,
     set_client_cookies_from_response,
     user1,
     user2,
     user3,
-    repository,
     username,
-    code_ok,
-    code_ok_response,
 )
 
 
-def test_setup(db_action, auth):
+def test_setup(db_action, auth: AuthAction):
     db_action.create_sample_users()
     auth.register_fixed()
 
@@ -36,7 +36,7 @@ def test_accept_friend(app, client, auth):
     res = auth.login_defined_user(user1)
     set_client_cookies_from_response(client, res)
 
-    r_id = client.get("/api/requests").json[0]["id"]
+    r_id = client.get("/api/requests").json["data"][0]["id"]
     res = client.post(f"/api/approve?request_id={r_id}")
     assert auth.code_ok(res.status_code)
 
@@ -50,7 +50,7 @@ def test_accept_friend(app, client, auth):
 def test_decline_friend(app, client, login_response_user2):
     set_client_cookies_from_response(client, login_response_user2)
 
-    r_id = client.get("/api/requests").json[0]["id"]  # id of first received request
+    r_id = client.get("/api/requests").json["data"][0]["id"]  # id of first received request
     res = client.post(f"/api/decline?request_id={r_id}")
     assert code_ok(res.status_code)
 
@@ -64,7 +64,7 @@ def test_decline_friend(app, client, login_response_user2):
 def test_have_two_requests(client, login_response_user3):
     set_client_cookies_from_response(client, login_response_user3)
 
-    data = client.get("/api/requests").json
+    data = client.get("/api/requests").json["data"]
     assert len(data) == 2
 
 
@@ -81,23 +81,23 @@ def test_search(client, login_response):
 
     res = client.get("/api/search?search=user&exclude_friends=true")
     assert code_ok_response(res)
-    assert len(res.json) == 1
-    assert res.json[0]["username"] == "user2"
+    assert len(res.json["data"]) == 1
+    assert res.json["data"][0]["username"] == "user2"
 
     res = client.get("/api/search?search=user&exclude_friends=false")
     assert code_ok_response(res)
-    assert len(res.json) == 3
+    assert len(res.json["data"]) == 3
     assert (
-        res.json[0]["username"] == user1["username"]
-        and res.json[1]["username"] == user2["username"]
-        and res.json[2]["username"] == user3["username"]
+        res.json["data"][0]["username"] == user1["username"]
+        and res.json["data"][1]["username"] == user2["username"]
+        and res.json["data"][2]["username"] == user3["username"]
     )
 
 
 def test_friends(client, login_response):
     set_client_cookies_from_response(client, login_response)
 
-    data = client.get("/api/friends").json
+    data = client.get("/api/friends").json["data"]
 
     assert len(data) == 1
     assert data[0]["username"] == user1["username"]
@@ -106,9 +106,7 @@ def test_friends(client, login_response):
 def test_send_message(app, client, login_response):
     set_client_cookies_from_response(client, login_response)
 
-    response = client.post(
-        f"/api/send_message/{user1['username']}", json={"message": "test message"}
-    )
+    response = client.post(f"/api/send_message/{user1['username']}", json={"message": "test message", "seen": False})
     assert code_ok_response(response)
 
     with app.app_context():
@@ -120,9 +118,7 @@ def test_send_message(app, client, login_response):
 def test_send_message_empty(client, login_response):
     set_client_cookies_from_response(client, login_response)
 
-    response = client.post(
-        f"/api/send_message/{user1['username']}", json={"message": ""}
-    )
+    response = client.post(f"/api/send_message/{user1['username']}", json={"message": "", "seen": False})
     assert not code_ok_response(response)
     assert "cannot be empty" in response.json["message"]
 
@@ -130,9 +126,7 @@ def test_send_message_empty(client, login_response):
 def test_send_message_non_friend(client, login_response):
     set_client_cookies_from_response(client, login_response)
 
-    response = client.post(
-        f"/api/send_message/{user2['username']}", json={"message": "test message 2"}
-    )
+    response = client.post(f"/api/send_message/{user2['username']}", json={"message": "test message 2", "seen": False})
 
     assert not code_ok_response(response)
     assert "not friends" in response.json["message"].lower()
@@ -141,12 +135,10 @@ def test_send_message_non_friend(client, login_response):
 def test_messages(client, login_response, login_response_user1):
     set_client_cookies_from_response(client, login_response_user1)
 
-    client.post(
-        f"/api/send_message/{username}", json={"message": "sending message back"}
-    )
+    client.post(f"/api/send_message/{username}", json={"message": "sending message back", "seen": False})
 
     set_client_cookies_from_response(client, login_response)
-    data = client.get(f"/api/messages/{user1['username']}").json
+    data = client.get(f"/api/messages/{user1['username']}").json["data"]
     assert len(data) == 2
     assert data[0]["text"] == "test message"
     assert data[1]["text"] == "sending message back"
