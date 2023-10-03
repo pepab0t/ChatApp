@@ -3,9 +3,9 @@ from sqlalchemy.exc import IntegrityError
 
 from config import MESSAGES_PER_PAGE, REQUESTS_PER_PAGE, USERS_PER_PAGE
 
+from .auth.entity import UserRegisterEntity
 from .database import db
 from .database.models import Message, Request, Room, User
-from .entity import UserRegisterEntity
 from .exceptions import DatabaseError
 
 
@@ -14,7 +14,7 @@ def register_user(user: UserRegisterEntity):
     db.session.add(new_user)
     try:
         db.session.commit()
-    except IntegrityError as e:
+    except IntegrityError as _:
         raise DatabaseError("Username or email already exists", 422)
 
     db.session.refresh(new_user)
@@ -66,9 +66,9 @@ def get_all_pending_requests_received(user_id: int, page: int | None = None):
     if user is None:
         return None
 
-    query = Request.query.filter(
-        Request.accepted == None, Request.receiver_id == user_id
-    ).order_by(Request.timestamp.desc())
+    query = Request.query.filter(Request.accepted == None, Request.receiver_id == user_id).order_by(
+        Request.timestamp.desc()
+    )
 
     if page is None:
         return query.all()
@@ -131,9 +131,7 @@ def get_users_by_text_exlude_friends(user: User, text: str, page: int | None = N
         .except_(User.query.filter(User.id == user.id))  # .filter(User.id != user.id)
         .filter(
             ~User.friends.any(User.id == user.id),
-            ~User.requests_received.any(
-                and_(Request.sender_id == user.id, Request.accepted == None)
-            ),
+            ~User.requests_received.any(and_(Request.sender_id == user.id, Request.accepted == None)),
         )
         .order_by(User.username)
     )
@@ -151,11 +149,7 @@ def create_message(sender: User, receiver: User, text: str, seen: bool):
 
 
 def get_room(user1: User, user2: User) -> Room:
-    room = (
-        Room.query.filter(Room.users.any(User.id == user1.id))
-        .filter(Room.users.any(User.id == user2.id))
-        .first()
-    )
+    room = Room.query.filter(Room.users.any(User.id == user1.id)).filter(Room.users.any(User.id == user2.id)).first()
 
     if room is not None:
         return room
@@ -202,9 +196,7 @@ def get_messages(user: User, friend: User, page: int | None = None):
 
 
 def get_unseen_messages(user: User, friend: User):
-    q = Message.query.filter(
-        Message.seen == False, Message.sender == friend, Message.receiver == user
-    )
+    q = Message.query.filter(Message.seen == False, Message.sender == friend, Message.receiver == user)
     return q.all()
 
 
@@ -214,12 +206,8 @@ def get_last_messages(user: User, friends: list[User]) -> list[Message | None]:
         message = (
             Message.query.filter(
                 or_(
-                    and_(
-                        Message.sender_id == user.id, Message.receiver_id == friend.id
-                    ),
-                    and_(
-                        Message.receiver_id == user.id, Message.sender_id == friend.id
-                    ),
+                    and_(Message.sender_id == user.id, Message.receiver_id == friend.id),
+                    and_(Message.receiver_id == user.id, Message.sender_id == friend.id),
                 )
             )
             .order_by(Message.timestamp.desc())

@@ -1,8 +1,8 @@
 import os
 
 from application import create_flask
+from application.auth.entity import UserRegisterEntity
 from application.database import db, models
-from application.entity import UserRegisterEntity
 
 app = create_flask("sqlite:///database.db")
 
