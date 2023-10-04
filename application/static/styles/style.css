@@ -335,6 +335,7 @@ button:hover {
 
 .sidebar-logo-img {
  max-width: 70px;
+ border-radius: 10px;
 }
 
 .chat-wrap {
@@ -467,12 +468,12 @@ button:hover {
 
 .messages-window {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   padding-bottom: 50px;
   padding-right: 50px;
   overflow-y: scroll;
   flex: 1;
-  justify-content: center;
+  /* justify-content: center; */
 }
 
 .message-bubble--second {
