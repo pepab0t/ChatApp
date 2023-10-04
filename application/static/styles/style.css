@@ -471,6 +471,8 @@ button:hover {
   padding-bottom: 50px;
   padding-right: 50px;
   overflow-y: scroll;
+  flex: 1;
+  justify-content: center;
 }
 
 .message-bubble--second {
