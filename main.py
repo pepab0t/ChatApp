@@ -1,11 +1,11 @@
 from application import create_app
 
 
+socketio, app = create_app()
+
+
 def main():
-    socketio, app = create_app()
-    socketio.run(
-        app, host="127.0.0.1", port=8000, debug=False, allow_unsafe_werkzeug=True
-    )
+    socketio.run(app, host="0.0.0.0", port=8000, debug=False)
 
 
 if __name__ == "__main__":
