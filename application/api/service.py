@@ -132,9 +132,10 @@ def sorter(user):
     def inner(item):
         if not (lm := item["last_message"]):
             return (False, datetime.min)
+        print(datetime.strptime(lm["timestamp"], r"%H:%M %d.%m.%Y").timestamp())
         return (
             lm["seen"] if user.id == lm["receiver"]["id"] else True,
-            datetime.strptime(lm["timestamp"], r"%H:%M %d.%m.%Y"),
+            -datetime.strptime(lm["timestamp"], r"%H:%M %d.%m.%Y").timestamp(),
         )
 
     return inner
