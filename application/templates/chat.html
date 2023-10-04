@@ -26,10 +26,12 @@
 {% block script %}
 <script>
   
-  const content = document.getElementById("content");
+  let page = 0;
+  let pageNext = 1;
+
+  const messageWindow = document.getElementById("content");
   const messageForm = document.getElementById("message-form");
   const messageInput = document.getElementById("message-input");
-  const messageContainer = document.querySelector(".messages-window");
   const submitBtn = document.getElementById("submit-button");
 
   const room = "{{room}}";
@@ -39,10 +41,26 @@
       sendMessage()
     }
   }
+
+  messageInput.onkeydown = (e) => {
+    if (e.keyCode == 13 && !e.shiftKey) {
+      e.preventDefault();
+    }
+  }
   
   function scrollBottom(){
-    messageContainer.scrollTop = messageContainer.scrollHeight;
+    messageWindow.scrollTop = messageWindow.scrollHeight;
   }
+
+  function isTop() {
+    return  (- event.target.scrollTop + messageWindow.clientHeight + 5) >= messageWindow.scrollHeight
+  }
+
+  messageWindow.addEventListener("scroll", async (event) => {
+    if (isTop() && page < pageNext) {
+      await load();
+    }
+  })
 
 
   var socketio = io(window.location.origin);
@@ -65,7 +83,6 @@
 
   const createMessage = ({text, sender, timestamp}) => {
       const isMe = sender.id == "{{user.id}}";
-      console.log(sender.id)
       const second = isMe ? '--second': ''
       const message = document.createElement('div');
       message.classList.add(`message-wrapper${second}`)
@@ -78,27 +95,42 @@
     ${text}
   </p>
 </div>`
-      content.append(message)
+    return message;
   }
 
   socketio.on("message", data => {
     console.log(data)
-    createMessage(data);
+    const message = createMessage(data);
+    messageWindow.insertBefore(message, messageWindow.firstChild);
     scrollBottom();
   })
 
   messageForm.onsubmit = sendMessage;
 
-</script>
+  async function load() {
+    page++;
+    const response = await fetch(`{{get_url('api.get_messages', username='__var1__')}}?page=${pageNext}`.replace("__var1__", "{{with_user}}"));
+    const json = await response.json();
+    if (response.status >= 200 && response.status < 400) {
+      if (json.pages > pageNext){
+        pageNext++;
+      }
+    }
+    json.data.forEach((message) => messageWindow.appendChild(createMessage(message)));
+  }
 
-<script>
-  fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}") + new URLSearchParams())
+  document.addEventListener("DOMContentLoaded", async () => {
+    while (messageWindow.clientHeight + 50 >= messageWindow.scrollHeight && page < pageNext) {
+      await load();
+    }
+  })
+
+  /*fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}") + new URLSearchParams())
   .then(response => response.json())
   .then(json => json.data.forEach(message => createMessage(message)))
   .then(scrollBottom)
-  .catch(error => console.log(error))
+  .catch(error => console.log(error))*/
 
   fetch("{{get_url('api.see_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}"))
-    .then(res => console.log(res.status))
 </script>
 {% endblock %}
