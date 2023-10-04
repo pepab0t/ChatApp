@@ -520,6 +520,8 @@ button:hover {
 .messages-container {
   width: 100%;
   margin: 90px 30px 0 30px;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-title {
@@ -622,4 +624,10 @@ input[type="search"]:focus {
   font-size: 13px;
   color: red;
   max-width: 300px;
+}
+
+#list {
+  overflow-y: scroll;
+  flex: 1;
+  padding: 0 10px;
 }

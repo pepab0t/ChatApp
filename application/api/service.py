@@ -79,7 +79,13 @@ def remove_friend(user_id: int, username: str):
     repository.remove_friends(user1, user2)
 
 
-def search(user_id: int, text: str, exclude_friends: bool, page: int | None = None):
+def search(
+    user_id: int,
+    text: str,
+    exclude_friends: bool,
+    page: int | None = None,
+    offset: int = 0,
+):
     if text == "":
         return [], 200
 
@@ -87,7 +93,9 @@ def search(user_id: int, text: str, exclude_friends: bool, page: int | None = No
     text = f"%{text}%"
 
     if exclude_friends:
-        users = repository.get_users_by_text_exlude_friends(user, text, page=page)
+        users = repository.get_users_by_text_exlude_friends(
+            user, text, page=page, offset=offset
+        )
     else:
         users = repository.get_users_by_text(user, text, page=page)
 
@@ -131,7 +139,7 @@ def add_last_message_to_friend(friend, message_dict):
 def sorter(user):
     def inner(item):
         if not (lm := item["last_message"]):
-            return (False, datetime.min)
+            return (False, 0)
         print(datetime.strptime(lm["timestamp"], r"%H:%M %d.%m.%Y").timestamp())
         return (
             lm["seen"] if user.id == lm["receiver"]["id"] else True,

@@ -1,7 +1,12 @@
 from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError
 
-from config import MESSAGES_PER_PAGE, REQUESTS_PER_PAGE, USERS_PER_PAGE
+from config import (
+    MESSAGES_PER_PAGE,
+    REQUESTS_PER_PAGE,
+    SEARCH_PER_PAGE,
+    FRIENDS_PER_PAGE,
+)
 
 from .auth.entity import UserRegisterEntity
 from .database import db
@@ -105,7 +110,7 @@ def get_friends(user: User):
 
 def get_friends_paginate(user: User, page):
     query = get_friends_query(user)
-    return query.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
+    return query.paginate(page=page, per_page=FRIENDS_PER_PAGE, error_out=True)
 
 
 def get_user_by_username(username: str):
@@ -122,10 +127,12 @@ def get_users_by_text(user: User, text: str, page: int | None = None):
     )
     if page is None:
         return q.all()
-    return q.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
+    return q.paginate(page=page, per_page=SEARCH_PER_PAGE, error_out=True)
 
 
-def get_users_by_text_exlude_friends(user: User, text: str, page: int | None = None):
+def get_users_by_text_exlude_friends(
+    user: User, text: str, page: int | None = None, offset: int = 0
+):
     q = (
         User.query.filter(User.username.like(text))
         .except_(User.query.filter(User.id == user.id))  # .filter(User.id != user.id)
@@ -139,7 +146,7 @@ def get_users_by_text_exlude_friends(user: User, text: str, page: int | None = N
     )
     if page is None:
         return q.all()
-    return q.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
+    return q.paginate(page=page, per_page=SEARCH_PER_PAGE, error_out=True)
 
 
 def create_message(sender: User, receiver: User, text: str, seen: bool):
