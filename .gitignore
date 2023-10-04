@@ -6,3 +6,4 @@ instance/
 .coverage
 htmlcov/
 /tests2
+docker-compose.yml

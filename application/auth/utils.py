@@ -2,7 +2,6 @@ import jwt
 import os
 import bcrypt
 import datetime
-from dotenv import get_key
 from typing import TypedDict
 from functools import partial
 from ..exceptions import InvalidJWT, ExpiredJWT, TolerableExpiredJWT
@@ -10,7 +9,7 @@ from ..exceptions import InvalidJWT, ExpiredJWT, TolerableExpiredJWT
 SALT: bytes = bcrypt.gensalt()
 _hashpw = partial(bcrypt.hashpw, salt=SALT)
 
-SECRET = get_key(".env", "APP_JWT_SECRET")
+SECRET = os.getenv("APP_JWT_SECRET")
 # ACCESS_TOKEN_DURATION_MINS = float(os.getenv("ACCESS_TOKEN_DURATION_MINS"))  # type: ignore
 # ACCESS_TOKEN_TOLERANCE_MINS = float(os.getenv("ACCESS_TOKEN_TOLERANCE_MINS"))  # type: ignore
 # REFRESH_TOKEN_DURATION_HOURS = float(os.getenv("REFRESH_TOKEN_DURATION_HOURS"))  # type: ignore
