@@ -6,9 +6,6 @@ from sqlalchemy.exc import IntegrityError
 
 
 def create_all(app):
-    if (ROOT / "instance" / DB_NAME).exists():
-        return
-
     with app.app_context():
         db.create_all()
 
@@ -20,4 +17,3 @@ class SQLAlchemyCustom(SQLAlchemy):
 
 
 db = SQLAlchemyCustom()
-DB_NAME = "database.db"

@@ -7,7 +7,7 @@ from flask_socketio import SocketIO, join_room, leave_room, send
 
 load_dotenv()
 
-from .database import DB_NAME, db
+from .database import db
 from .error_handlers import (
     handle_chat_app_exception,
     handle_database_error,
@@ -20,11 +20,14 @@ def get_url(endpoint: str, **path_params):
     return f"{request.host_url}{url_for(endpoint, **path_params)}"
 
 
-def create_flask(db_uri: str):
+def create_flask():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.getenv("APP_SECRET_KEY")
     app.config["JWT_SECRET_KEY"] = os.getenv("APP_JWT_SECRET")
-    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+    app.config[
+        "SQLALCHEMY_DATABASE_URI"
+    ] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+
     app.config["JWT_TOKEN_LOCATION"] = "cookies"
 
     db.init_app(app)
@@ -53,8 +56,8 @@ def create_flask(db_uri: str):
     return app
 
 
-def create_app(db_uri):
-    app = create_flask(db_uri)
+def create_app():
+    app = create_flask()
     socket = SocketIO(app, cors_allowed_origins="*")  # ["http://127.0.0.1:5500"])
 
     @socket.on("join_room")
