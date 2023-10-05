@@ -41,6 +41,11 @@ def get_all_pending_requests_received(user_id, page: int | None = None):
     return {"page": None, "pages": None, "data": data}
 
 
+def get_pending_requests_count(user_id: int) -> int:
+    user = repository.get_user_by_id(user_id)
+    return repository.get_pending_requests_count(user)
+
+
 def approve_request(user_id: int, request_id: int):
     if (request := repository.get_opened_request_by_id(request_id)) is None:
         raise EntityNotFound(f"Request ID `{request_id}` not found")
