@@ -4,16 +4,14 @@ from application import create_flask
 from application.auth.entity import UserRegisterEntity
 from application.database import db, models
 
-app = create_flask("sqlite:///database.db")
-
 os.system("rm instance/database.db")
 os.system("rd instance/database.db")
+
+app = create_flask()
 
 
 def create_users():
     with app.app_context():
-        db.create_all()
-
         users = []
 
         pepa = {"username": "pepa", "email": "pepa@test.com", "password": "pepa"}
