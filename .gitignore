@@ -2,8 +2,9 @@ venv/
 instance/
 .env
 **.pyc
-**/__pycache__
+**__pycache__
 .coverage
 htmlcov/
 /tests2
 mysql/
+.vscode

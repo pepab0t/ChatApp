@@ -51,6 +51,13 @@ def get_requests(user_id: int):
     return jsonify(requests), 200
 
 
+@api.route("/requests/count", methods=["GET"])
+@token_valid()
+def get_requests_count(user_id: int):
+    count: int = service.get_pending_requests_count(user_id)
+    return jsonify({"count": count}), 200
+
+
 @api.route("/delete_friend/<string:username>", methods=["DELETE"])
 @token_valid()
 def remove_friend(user_id: int, username: str):

@@ -80,6 +80,11 @@ def get_all_pending_requests_received(user_id: int, page: int | None = None):
     return query.paginate(page=page, per_page=REQUESTS_PER_PAGE, error_out=True)
 
 
+def get_pending_requests_count(user: User) -> int:
+    q = Request.query.filter(Request.accepted == None, Request.receiver == user)
+    return q.count()
+
+
 def get_request_by_id(id: int):
     return Request.query.get(id)
 

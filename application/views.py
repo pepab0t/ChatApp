@@ -13,7 +13,7 @@ from flask import (
 
 from . import repository, get_url, auth
 
-views = Blueprint("views", __name__)
+views = Blueprint("views", __name__, url_prefix="")
 
 
 def redirect_login():
@@ -29,6 +29,14 @@ def set_cookies(response, cookies) -> None:
         response.set_cookie(k, v, httponly=True)
 
 
+def get_request_count() -> int:
+    response = requests.get(get_url("api.get_requests_count"), cookies=request.cookies)
+    if not response.ok or "count" not in (data := response.json()):
+        return 0
+    else:
+        return data["count"]
+
+
 @views.get("/")
 def home():
     response = requests.get(
@@ -38,17 +46,24 @@ def home():
     if not response.ok:
         return redirect_login()
 
+    request_count: int = get_request_count()
+    print(f"{request_count=}")
+
     data = response.json().get("data")
     r = make_response(
         render_template(
-            "messages-list.html", user=current_user(), friends=data, nav=True
+            "messages-list.html",
+            user=current_user(),
+            request_count=request_count,
+            friends=data,
+            nav=True,
         )
     )
     set_cookies(r, response.cookies)
     return r
 
 
-@views.route("/login", methods=["GET", "POST"])
+@views.route("/login/", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
         return render_template("login.html")
@@ -94,7 +109,7 @@ def login():
     return r
 
 
-@views.route("/register", methods=["POST", "GET"])
+@views.route("/register/", methods=["POST", "GET"])
 def register():
     if request.method == "GET":
         return render_template("register.html")
@@ -186,7 +201,12 @@ def add_friend():
     response = requests.get(get_url("api.test"), cookies=request.cookies)
     if not response.ok:
         return redirect_login()
-    r = make_response(render_template("search.html", user=current_user(), nav=True))
+    request_count: int = get_request_count()
+    r = make_response(
+        render_template(
+            "search.html", user=current_user(), nav=True, request_count=request_count
+        )
+    )
     set_cookies(r, response.cookies)
     return r
 
