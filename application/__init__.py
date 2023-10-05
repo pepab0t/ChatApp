@@ -24,9 +24,12 @@ def create_flask():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.getenv("APP_SECRET_KEY")
     app.config["JWT_SECRET_KEY"] = os.getenv("APP_JWT_SECRET")
-    app.config[
-        "SQLALCHEMY_DATABASE_URI"
-    ] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+    if (db_uri := os.getenv("DB_URI")) is not None:
+        app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+    else:
+        app.config[
+            "SQLALCHEMY_DATABASE_URI"
+        ] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 
     app.config["JWT_TOKEN_LOCATION"] = "cookies"
 
