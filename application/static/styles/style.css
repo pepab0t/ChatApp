@@ -79,7 +79,8 @@ input:focus-visible, textarea:focus-visible  {
 
 
 button {
-  background: linear-gradient(133deg, #D0C3FC 0%, #C397FC 100%);
+  /* background: linear-gradient(133deg, #D0C3FC 0%, #C397FC 100%); */
+  background-color: #C397FC;
   box-shadow: 0px 4px 5px 0px #d1cbe4;
   border: none;
   font-size: 14px;
@@ -96,9 +97,10 @@ button {
 }
 
 button:hover {
-  background: linear-gradient(133deg, #B9A8F1 0%, #B27FF3 100%);
+  /* background: linear-gradient(133deg, #B9A8F1 0%, #B27FF3 100%); */
+  background-color: #7614ec;
   box-shadow: 0px 4px 5px 0px #d1cbe4;
-  transition: 0.3s;
+  /* transition: 0.3s; */
 }
 
 .navbar {
@@ -263,7 +265,7 @@ button:hover {
 }
 
 .sign__form {
-  margin-top: 40px;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
 }
@@ -273,6 +275,7 @@ button:hover {
   font-weight: 600;
   margin-top: 40px;
   max-width: 230px;
+  justify-content: center;
 }
 
 .sign__label {
