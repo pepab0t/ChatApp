@@ -62,6 +62,7 @@ def get_requests_count(user_id: int):
 @token_valid()
 def remove_friend(user_id: int, username: str):
     service.remove_friend(user_id, username)
+    return jsonify(), 204
 
 
 @api.route("/search", methods=["GET"])

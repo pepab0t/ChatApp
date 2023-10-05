@@ -1,5 +1,5 @@
 import pytest
-
+import os
 from application import create_app, db
 
 from .helper import AuthAction, DBAction, user1, user2, user3
@@ -7,7 +7,8 @@ from .helper import AuthAction, DBAction, user1, user2, user3
 
 @pytest.fixture(scope="session")
 def app():
-    _, app = create_app("sqlite://")
+    os.environ["DB_URI"] = "sqlite://"
+    _, app = create_app()
     app.config["TESTING"] = True
 
     with app.app_context():
