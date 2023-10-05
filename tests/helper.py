@@ -28,7 +28,7 @@ def code_ok(status_code: int):
     return 200 <= status_code <= 299
 
 
-def code_ok_response(response):
+def code_ok_response(response) -> bool:
     return 200 <= response.status_code <= 299
 
 
