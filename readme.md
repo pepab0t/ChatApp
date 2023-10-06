@@ -20,7 +20,7 @@ Pros of access service directly from `views` instead of sending requests:
 - application will be probably faster
 
 Cons:
-- `views` module is bound to backed `service`s, which means that frontend would be bound to one specific backend and we cannot approach them as two different services. 
+- `views` module is bound to backend `service`s, which means that frontend would be bound to one specific backend and we cannot approach them as two different services. 
 
 ## Token handling
 Tokens are stored in `httpOnly` cookies. They are not accessible from JavaScript. Only backend manipulates with token cookies.
