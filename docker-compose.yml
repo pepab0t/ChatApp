@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   application:
+    container_name: chat_app
     build: .
     ports:
       - 8000:8000
@@ -11,7 +12,8 @@ services:
     environment: 
       DB_USER: root
       DB_PASSWORD: coffee
-      DB_HOST: host.docker.internal
+      # DB_HOST: host.docker.internal
+      DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: chat
       APP_SECRET_KEY: "2a70776525816b3fb05e6379df3f9fc2"
