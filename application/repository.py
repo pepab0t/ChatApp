@@ -1,11 +1,16 @@
 from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError
 
-from config import MESSAGES_PER_PAGE, REQUESTS_PER_PAGE, USERS_PER_PAGE
+from config import (
+    MESSAGES_PER_PAGE,
+    REQUESTS_PER_PAGE,
+    SEARCH_PER_PAGE,
+    FRIENDS_PER_PAGE,
+)
 
+from .auth.entity import UserRegisterEntity
 from .database import db
 from .database.models import Message, Request, Room, User
-from .entity import UserRegisterEntity
 from .exceptions import DatabaseError
 
 
@@ -14,8 +19,8 @@ def register_user(user: UserRegisterEntity):
     db.session.add(new_user)
     try:
         db.session.commit()
-    except IntegrityError as e:
-        raise DatabaseError(e.args[0], 422)
+    except IntegrityError as _:
+        raise DatabaseError("Username or email already exists", 422)
 
     db.session.refresh(new_user)
     del new_user.password
@@ -75,6 +80,11 @@ def get_all_pending_requests_received(user_id: int, page: int | None = None):
     return query.paginate(page=page, per_page=REQUESTS_PER_PAGE, error_out=True)
 
 
+def get_pending_requests_count(user: User) -> int:
+    q = Request.query.filter(Request.accepted == None, Request.receiver == user)
+    return q.count()
+
+
 def get_request_by_id(id: int):
     return Request.query.get(id)
 
@@ -84,13 +94,28 @@ def get_opened_request_by_id(id: int):
     return out if out.accepted is None else None
 
 
-def get_user_by_id(id: int):
+def get_user_by_id(id: int) -> User:
     return User.query.get(id)
 
 
+def get_friends_query(user: User):
+    q = (
+        User.query.filter(User.friends.any(User.id == user.id))
+        # .join(Room, User.rooms)
+        # .join(Message, Room.last_message)
+        # .order_by(Message.timestamp.desc())
+    )
+
+    return q
+
+
+def get_friends(user: User):
+    return get_friends_query(user).all()
+
+
 def get_friends_paginate(user: User, page):
-    query = user.query.filter(User.friends.any(User.id == user.id))
-    return query.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
+    query = get_friends_query(user)
+    return query.paginate(page=page, per_page=FRIENDS_PER_PAGE, error_out=True)
 
 
 def get_user_by_username(username: str):
@@ -107,10 +132,12 @@ def get_users_by_text(user: User, text: str, page: int | None = None):
     )
     if page is None:
         return q.all()
-    return q.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
+    return q.paginate(page=page, per_page=SEARCH_PER_PAGE, error_out=True)
 
 
-def get_users_by_text_exlude_friends(user: User, text: str, page: int | None = None):
+def get_users_by_text_exlude_friends(
+    user: User, text: str, page: int | None = None, offset: int = 0
+):
     q = (
         User.query.filter(User.username.like(text))
         .except_(User.query.filter(User.id == user.id))  # .filter(User.id != user.id)
@@ -124,18 +151,18 @@ def get_users_by_text_exlude_friends(user: User, text: str, page: int | None = N
     )
     if page is None:
         return q.all()
-    return q.paginate(page=page, per_page=USERS_PER_PAGE, error_out=True)
+    return q.paginate(page=page, per_page=SEARCH_PER_PAGE, error_out=True)
 
 
-def create_message(sender: User, receiver: User, text: str):
-    message = Message(sender=sender, receiver=receiver, text=text)
+def create_message(sender: User, receiver: User, text: str, seen: bool):
+    message = Message(sender=sender, receiver=receiver, text=text, seen=seen)
     db.session.add(message)
     db.session.commit()
     db.session.refresh(message)
     return message
 
 
-def get_room(user1: User, user2: User):
+def get_room(user1: User, user2: User) -> Room:
     room = (
         Room.query.filter(Room.users.any(User.id == user1.id))
         .filter(Room.users.any(User.id == user2.id))
@@ -154,7 +181,13 @@ def get_room(user1: User, user2: User):
     return room
 
 
-def get_messages(user: User, friend: User, page: int | None = None):
+def update_last_room_message(user1: User, user2: User, last_message: Message):
+    room = get_room(user1, user2)
+    room.last_message_id = last_message.id
+    db.session.commit()
+
+
+def get_messages_query(user: User, friend: User):
     messages = (
         Message.query.filter(
             or_(
@@ -168,19 +201,51 @@ def get_messages(user: User, friend: User, page: int | None = None):
                 Message.receiver.has(id=friend.id),
             )
         )
-        .order_by(Message.timestamp)  # .desc()
+        .order_by(Message.timestamp.desc())
     )
+    return messages
 
+
+def get_messages(user: User, friend: User, page: int | None = None):
+    messages = get_messages_query(user, friend)
     if page is None:
         return messages.all()
     return messages.paginate(page=page, per_page=MESSAGES_PER_PAGE, error_out=True)
 
 
-def get_last_message(user: User, friend: User) -> Message | None:
-    # user.messages_received
-    messages = list(filter(lambda m: m.receiver == friend, user.messages_sent)) + list(
-        filter(lambda m: m.sender == friend, user.messages_received)
+def get_unseen_messages(user: User, friend: User):
+    q = Message.query.filter(
+        Message.seen == False, Message.sender == friend, Message.receiver == user
     )
-    if not messages:
-        return None
-    return sorted(messages, key=lambda m: m.timestamp, reverse=True)[0]
+    return q.all()
+
+
+def get_last_messages(user: User, friends: list[User]) -> list[Message | None]:
+    messages = []
+    for friend in friends:
+        message = (
+            Message.query.filter(
+                or_(
+                    and_(
+                        Message.sender_id == user.id, Message.receiver_id == friend.id
+                    ),
+                    and_(
+                        Message.receiver_id == user.id, Message.sender_id == friend.id
+                    ),
+                )
+            )
+            .order_by(Message.timestamp.desc())
+            .first()
+        )
+
+        messages.append(message)
+
+    return messages
+
+
+def see_messages(messages: list[Message]) -> None:
+    for message in messages:
+        message.seen = True
+        print(message)
+
+    db.session.commit()

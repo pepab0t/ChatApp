@@ -9,6 +9,7 @@ from . import service
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
+
 @api.get("/test")
 @token_valid()
 def test():
@@ -50,11 +51,18 @@ def get_requests(user_id: int):
     return jsonify(requests), 200
 
 
+@api.route("/requests/count", methods=["GET"])
+@token_valid()
+def get_requests_count(user_id: int):
+    count: int = service.get_pending_requests_count(user_id)
+    return jsonify({"count": count}), 200
+
+
 @api.route("/delete_friend/<string:username>", methods=["DELETE"])
 @token_valid()
 def remove_friend(user_id: int, username: str):
     service.remove_friend(user_id, username)
-    return jsonify({"message": "success"}), 204
+    return jsonify(), 204
 
 
 @api.route("/search", methods=["GET"])
@@ -74,9 +82,12 @@ def search(user_id: int):
 @token_valid()
 def send_message(user_id: int, username: str):
     message = request.get_json().get("message", None)
+    seen = request.get_json().get("seen", None)
     if message is None:
         raise InvalidRequestException("Missing json body key `message`")
-    result, code = service.send_message(user_id, username, message)
+    if seen is None:
+        raise InvalidRequestException("Missing json body key `seen`")
+    result, code = service.send_message(user_id, username, message, seen)
     return jsonify(result), code
 
 
@@ -101,3 +112,10 @@ def get_messages(user_id: int, username: str):
     page: int | None = request.args.get("page", None, type=int)
     messages, code = service.get_messages(user_id, username, page)
     return jsonify(messages), code
+
+
+@api.get("/see_messages/<string:username>")
+@token_valid()
+def see_messages(user_id: int, username: str):
+    response, code = service.see_messages(user_id, username)
+    return jsonify(response), code

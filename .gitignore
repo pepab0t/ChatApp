@@ -1,8 +1,10 @@
 venv/
 instance/
 .env
-*.pyc
-**/__pycache__
+**.pyc
+**__pycache__
 .coverage
 htmlcov/
 /tests2
+mysql/
+.vscode

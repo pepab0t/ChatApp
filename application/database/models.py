@@ -107,10 +107,11 @@ class Message(db.Model):
     def dict(self):
         return {
             "id": self.id,
-            "sender": self.sender.username,
-            "receiver": self.receiver.username,
+            "sender": self.sender.dict(),
+            "receiver": self.receiver.dict(),
             "text": self.text,
-            "timestamp": self.timestamp,
+            "timestamp": self.timestamp.strftime(r"%H:%M %d.%m.%Y"),
+            "seen": self.seen,
         }
 
 
@@ -118,8 +119,13 @@ class Room(db.Model):
     __tablename__ = "room"
 
     id = db.Column(db.Integer, primary_key=True)
-
     users = db.relationship("User", secondary=user_room, backref="rooms")
+
+    last_message_id = db.Column(
+        db.ForeignKey("message.id", ondelete="CASCADE"), nullable=True
+    )
+
+    last_message = db.relationship("Message")
 
     def get_name(self):
         return f"R{self.id}"

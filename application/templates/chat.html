@@ -3,31 +3,11 @@
   <div class="user-header">
     <div class="user-info--left">
       <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo" />
-      <h4 class="user-name">Chatting with {{with_user}}</h4>
+      <h4 class="user-name">Chatting with: <strong>{{with_user}}</strong></h4>
     </div>
   </div>
   <div class="chat-window">
     <div class="messages-window" id="content">
-
-      <!-- friends message -->
-      <!-- <div class="message-wrapper">
-        <div class="message-header">
-          <span class="message-time"> 11:01 </span>
-          <span class="message-sender">{{with_user.username}}</span>
-        </div>
-        <div class="message-bubble">Hello I have to tell you something</div>
-      </div> -->
-
-      <!-- my message -->
-      <!-- <div class="message-wrapper--second">
-        <div class="message-header">
-          <span class="message-time"> 11:01 </span>
-          <span class="message-sender"> You </span>
-        </div>
-        <div class="message-bubble--second">
-          Hello I have to tell you something
-        </div>
-      </div> -->
 
     </div>
     <form class="chat-wrapper" id="message-form">
@@ -37,7 +17,7 @@
         name="chat-input"
         id="message-input"
       ></textarea>
-      <button type="submit">Send</button>
+      <button type="submit" id="submit-button">Send</button>
     </form>
   </div>
 </div>
@@ -46,89 +26,119 @@
 {% block script %}
 <script>
   
-  const content = document.getElementById("content");
+  let page = 0;
+  let pageNext = 1;
+  let loading = false;
+
+  const messageWindow = document.getElementById("content");
   const messageForm = document.getElementById("message-form");
   const messageInput = document.getElementById("message-input");
-  const messageContainer = document.querySelector(".messages-window");
-  
-  function scrollBottom(){
-    messageContainer.scrollTop = messageContainer.scrollHeight;
+  const submitBtn = document.getElementById("submit-button");
+
+  function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
   }
 
+  const room = "{{room}}";
 
-  var socketio = io();
+  document.onkeydown = (e) => {
+    if (e.keyCode == 13) {
+      sendMessage()
+    }
+  }
+
+  messageInput.onkeydown = (e) => {
+    if (e.keyCode == 13 && !e.shiftKey) {
+      e.preventDefault();
+    }
+  }
+  
+  function scrollBottom(){
+    //messageWindow.scrollTop = messageWindow.scrollHeight;
+    messageWindow.scrollTop = 0;
+  }
+
+  function isTop() {
+    return  (- messageWindow.scrollTop + messageWindow.clientHeight + 2 ) >= messageWindow.scrollHeight
+  }
+
+  messageWindow.addEventListener("scroll", async (event) => {
+    // console.log(- messageWindow.scrollTop + messageWindow.clientHeight, messageWindow.scrollHeight)
+    if (isTop() && page < pageNext && !loading) {
+      messageWindow.style = "overflow: hidden;"
+      loading = true;
+      let originalScroll = messageWindow.scrollTop;
+      await load();
+      messageWindow.scrollTop = originalScroll;
+      await sleep(1000);
+      loading = false;
+      messageWindow.style = "";
+    }
+  })
+
+
+  var socketio = io(window.location.origin);
   socketio.on("connect", function() {
-      socketio.emit("join_room", {room: "{{room}}"})
+      socketio.emit("join_room", {room: room})
   })
 
   socketio.on("disconnect", function() {
-      socketio.emit("leave_room", {room: "{{room}}"})
+      socketio.emit("leave_room", {room: room})
   })
 
   const sendMessage = () => {
     const message = messageInput.value;
-
-    if (!message){
-      console.log(message)
-      return false;
+    if (message){
+      socketio.emit("message", {message: message, room: room, with_user: "{{with_user}}" });
+      messageInput.value = '';
     } 
-
-    fetch("{{ get_url('api.send_message', username='__var1__') }}".replace("__var1__", '{{with_user}}'), {
-        method: "POST",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({message: message})
-    })
-    .then(response => {
-      if (!response.ok){
-        throw new Error(response.text());
-      }
-      return response.json()
-    })
-    .then(json => {
-        json.room = "{{room}}";
-        console.log(json);
-        socketio.emit("message", json)
-        messageInput.value = ""
-    })
-    .catch(error => console.log(error))
-
     return false;
   }
 
   const createMessage = ({text, sender, timestamp}) => {
-      const isMe = sender === "{{user.username}}";
+      const isMe = sender.id == "{{user.id}}";
       const second = isMe ? '--second': ''
       const message = document.createElement('div');
       message.classList.add(`message-wrapper${second}`)
       message.innerHTML = `
 <div class="message-header">
   <span class="message-time"> ${timestamp} </span>
-  <span class="message-sender"> ${sender} </span>
 </div>
 <div class="message-bubble${second}">
-  ${text}
+  <p>
+    ${text}
+  </p>
 </div>`
-      content.append(message)
+    return message;
   }
 
   socketio.on("message", data => {
     console.log(data)
-    createMessage(data);
+    const message = createMessage(data);
+    messageWindow.insertBefore(message, messageWindow.firstChild);
     scrollBottom();
   })
 
   messageForm.onsubmit = sendMessage;
 
-</script>
+  async function load() {
+    page++;
+    const response = await fetch(`{{get_url('api.get_messages', username='__var1__')}}?page=${pageNext}`.replace("__var1__", "{{with_user}}"));
+    const json = await response.json();
+    if (response.status >= 200 && response.status < 400) {
+      if (json.pages > pageNext){
+        pageNext++;
+      }
+    }
+    json.data.forEach((message) => messageWindow.appendChild(createMessage(message)));
+  }
 
-<script>
-  fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}") + new URLSearchParams())
-  .then(response => response.json())
-  .then(json => json.data.forEach(message => createMessage(message)))
-  .then(scrollBottom)
-  .catch(error => console.log(error))
+  document.addEventListener("DOMContentLoaded", async () => {
+    while (messageWindow.clientHeight + 50 >= messageWindow.scrollHeight && page < pageNext) {
+      await load();
+    }
+  })
+
+  fetch("{{get_url('api.see_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}"))
 </script>
 {% endblock %}

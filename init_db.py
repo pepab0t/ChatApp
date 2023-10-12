@@ -1,34 +1,35 @@
 import os
 
 from application import create_flask
+from application.auth.entity import UserRegisterEntity
 from application.database import db, models
-from application.entity import UserRegisterEntity
-
-app = create_flask("sqlite:///database.db")
 
 os.system("rm instance/database.db")
 os.system("rd instance/database.db")
 
+app = create_flask()
+
 
 def create_users():
     with app.app_context():
-        db.create_all()
-
         users = []
+
         pepa = {"username": "pepa", "email": "pepa@test.com", "password": "pepa"}
-        u1 = {"username": "user1", "email": "user1@test.com", "password": "1234"}
         eliska = {
             "username": "eliska",
             "email": "eliska@email.com",
             "password": "eliska",
         }
-        u2 = {"username": "user2", "email": "user2@test.com", "password": "1234"}
-        u3 = {"username": "user3", "email": "user3@test.com", "password": "1234"}
         users.append(models.User(**UserRegisterEntity(**pepa).dict()))
         users.append(models.User(**UserRegisterEntity(**eliska).dict()))
-        users.append(models.User(**UserRegisterEntity(**u1).dict()))
-        users.append(models.User(**UserRegisterEntity(**u2).dict()))
-        users.append(models.User(**UserRegisterEntity(**u3).dict()))
+
+        for i in range(1, 26):
+            user = {
+                "username": f"user{i}",
+                "email": f"user{i}@test.com",
+                "password": "1234",
+            }
+            users.append(models.User(**UserRegisterEntity(**user).dict()))
 
         db.session.add_all(users)
         db.session.commit()

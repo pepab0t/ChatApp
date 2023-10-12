@@ -2,6 +2,7 @@ from flask_sqlalchemy.pagination import Pagination
 
 from .. import repository
 from ..exceptions import EntityNotFound, Forbidden, InvalidRequestException
+from datetime import datetime
 
 
 def already_friends(user1, user2):
@@ -38,6 +39,11 @@ def get_all_pending_requests_received(user_id, page: int | None = None):
         return {"page": page, "pages": requests.pages, "data": data}
 
     return {"page": None, "pages": None, "data": data}
+
+
+def get_pending_requests_count(user_id: int) -> int:
+    user = repository.get_user_by_id(user_id)
+    return repository.get_pending_requests_count(user)
 
 
 def approve_request(user_id: int, request_id: int):
@@ -78,7 +84,13 @@ def remove_friend(user_id: int, username: str):
     repository.remove_friends(user1, user2)
 
 
-def search(user_id: int, text: str, exclude_friends: bool, page: int | None = None):
+def search(
+    user_id: int,
+    text: str,
+    exclude_friends: bool,
+    page: int | None = None,
+    offset: int = 0,
+):
     if text == "":
         return [], 200
 
@@ -86,7 +98,9 @@ def search(user_id: int, text: str, exclude_friends: bool, page: int | None = No
     text = f"%{text}%"
 
     if exclude_friends:
-        users = repository.get_users_by_text_exlude_friends(user, text, page=page)
+        users = repository.get_users_by_text_exlude_friends(
+            user, text, page=page, offset=offset
+        )
     else:
         users = repository.get_users_by_text(user, text, page=page)
 
@@ -104,8 +118,8 @@ def search(user_id: int, text: str, exclude_friends: bool, page: int | None = No
     }, 200  ### ENDED HERE
 
 
-def send_message(user_id: int, username: str, text: str):
-    if text == "":
+def send_message(user_id: int, username: str, text: str, seen: bool):
+    if text.strip() == "":
         raise InvalidRequestException("Message cannot be empty")
     if (sender := repository.get_user_by_id(user_id)) is None:
         raise EntityNotFound(f"User ID `{user_id}` not found")
@@ -115,7 +129,9 @@ def send_message(user_id: int, username: str, text: str):
     if not already_friends(sender, receiver):
         raise InvalidRequestException("Users are not friends")
 
-    message = repository.create_message(sender, receiver, text)
+    message = repository.create_message(sender, receiver, text, seen)
+    repository.update_last_room_message(sender, receiver, message)
+
     return message.dict(), 201
 
 
@@ -123,6 +139,19 @@ def add_last_message_to_friend(friend, message_dict):
     data = friend.dict()
     data["last_message"] = message_dict or None
     return data
+
+
+def sorter(user):
+    def inner(item):
+        if not (lm := item["last_message"]):
+            return (False, 0)
+        print(datetime.strptime(lm["timestamp"], r"%H:%M %d.%m.%Y").timestamp())
+        return (
+            lm["seen"] if user.id == lm["receiver"]["id"] else True,
+            -datetime.strptime(lm["timestamp"], r"%H:%M %d.%m.%Y").timestamp(),
+        )
+
+    return inner
 
 
 def get_friends(user_id: int, page: int | None = None):
@@ -133,22 +162,24 @@ def get_friends(user_id: int, page: int | None = None):
         raise EntityNotFound(f"User ID `{user_id}` not found")
 
     if page is None:
-        friends = user.friends
+        friends = repository.get_friends(user)
     else:
         friends = repository.get_friends_paginate(user, page)
 
     if friends:
-        message = repository.get_last_message(user, friends[0])
+        messages = repository.get_last_messages(user, friends)
     else:
-        message = None
+        messages = []
 
-    data = list(
-        map(
-            lambda friend: add_last_message_to_friend(
-                friend, message.dict() if message else {}
-            ),
-            friends,
-        )
+    data = []
+    for friend, message in zip(friends, messages):
+        item = friend.dict()
+        item["last_message"] = message.dict() if message else dict()
+        data.append(item)
+
+    data.sort(
+        key=sorter(user),
+        reverse=False,
     )
 
     if isinstance(friends, Pagination):
@@ -181,3 +212,12 @@ def get_messages(user_id: int, friend_username: str, page: int | None = None):
         return {"page": page, "pages": messages.pages, "data": list(data)}, 200
 
     return {"page": None, "pages": None, "data": list(data)}, 200
+
+
+def see_messages(user_id: int, username_other: str):
+    user = repository.get_user_by_id(user_id)
+    friend = repository.get_user_by_username(username_other)
+    messages = repository.get_unseen_messages(user, friend)
+    repository.see_messages(messages)
+
+    return {}, 204

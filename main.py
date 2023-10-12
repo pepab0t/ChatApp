@@ -1,9 +1,11 @@
-from application import DB_NAME, create_app
+from application import create_app
+
+
+socketio, app = create_app()
 
 
 def main():
-    socketio, app = create_app(f"sqlite:///{DB_NAME}")
-    socketio.run(app, host="0.0.0.0", port=5000, debug=False)
+    socketio.run(app, host="127.0.0.1", port=8000, debug=True)
 
 
 if __name__ == "__main__":

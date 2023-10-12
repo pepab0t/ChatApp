@@ -1,9 +1,10 @@
 import base64
-from werkzeug.test import TestResponse
-from application import repository
 import re
 
-from application.entity import UserRegisterEntity
+from werkzeug.test import TestResponse
+
+from application import repository
+from application.auth.entity import UserRegisterEntity
 from application.database.models import User
 
 username = "test"
@@ -27,7 +28,7 @@ def code_ok(status_code: int):
     return 200 <= status_code <= 299
 
 
-def code_ok_response(response):
+def code_ok_response(response) -> bool:
     return 200 <= response.status_code <= 299
 
 

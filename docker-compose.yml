@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  application:
+    build: .
+    ports:
+      - 8000:8000
+    depends_on:
+      - mysql
+    restart: always
+    environment: 
+      DB_USER: root
+      DB_PASSWORD: coffee
+      DB_HOST: host.docker.internal
+      DB_PORT: 3306
+      DB_NAME: chat
+      APP_SECRET_KEY: "2a70776525816b3fb05e6379df3f9fc2"
+      APP_JWT_SECRET: "a9456b15e6274e01dc7a0db5c2e3778a"
+      ACCESS_TOKEN_DURATION_MINS: 10
+      ACCESS_TOKEN_TOLERANCE_MINS: 470
+      REFRESH_TOKEN_DURATION_HOURS: 8
+  mysql:
+    image: mysql
+    restart: always
+    environment: 
+      MYSQL_DATABASE: chat
+      MYSQL_ROOT_PASSWORD: "coffee"
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql:/var/lib/mysql

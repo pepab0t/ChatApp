@@ -40,7 +40,9 @@ strong {
 a {
   color: #c7c7c7;
   font-weight: 500;
+  text-decoration: none;
 }
+
 label {
   display: block;
   font-weight: 400;
@@ -77,7 +79,8 @@ input:focus-visible, textarea:focus-visible  {
 
 
 button {
-  background: linear-gradient(133deg, #D0C3FC 0%, #C397FC 100%);
+  /* background: linear-gradient(133deg, #D0C3FC 0%, #C397FC 100%); */
+  background-color: #C397FC;
   box-shadow: 0px 4px 5px 0px #d1cbe4;
   border: none;
   font-size: 14px;
@@ -94,9 +97,10 @@ button {
 }
 
 button:hover {
-  background: linear-gradient(133deg, #B9A8F1 0%, #B27FF3 100%);
+  /* background: linear-gradient(133deg, #B9A8F1 0%, #B27FF3 100%); */
+  background-color: #7614ec;
   box-shadow: 0px 4px 5px 0px #d1cbe4;
-  transition: 0.3s;
+  /* transition: 0.3s; */
 }
 
 .navbar {
@@ -261,7 +265,7 @@ button:hover {
 }
 
 .sign__form {
-  margin-top: 40px;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
 }
@@ -271,6 +275,7 @@ button:hover {
   font-weight: 600;
   margin-top: 40px;
   max-width: 230px;
+  justify-content: center;
 }
 
 .sign__label {
@@ -333,6 +338,7 @@ button:hover {
 
 .sidebar-logo-img {
  max-width: 70px;
+ border-radius: 10px;
 }
 
 .chat-wrap {
@@ -362,7 +368,7 @@ button:hover {
   display: flex;
   justify-content: center;
   gap: 20px;
-  padding: 20px;
+  padding: 0 20px 20px 20px;
   align-items: center;
 }
 
@@ -382,19 +388,19 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 auto;
+  margin: 10px auto;
+  background-color: #f1f3f3;
+  border-radius: 12px;
+  transition: all .2s ease-in-out;
+  color: #707070;
+
 }
 
-.user-info--messages {
-  padding: 15px 40px;
-  max-width: 1200px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 20px auto 0 auto;
-  border: 2px solid gainsboro;
-  border-radius: 30px;
+.user-info:hover {
+  transform: scale(1.01);
+  background-color: #e7e7e7;
 }
+
 
 .user-info--left {
   padding: 15px 40px;
@@ -407,6 +413,12 @@ button:hover {
 .user-info--notactive {
   background-color: #f1f3f3;
   border-radius: 12px;
+}
+
+.user-info--noresult {
+  background-color: #f1f3f3;
+  border-radius: 12px;
+  justify-content: center;
 }
 
 .user-photo {
@@ -427,6 +439,7 @@ button:hover {
 
 .message-wrapper {
   padding-bottom: 10px;
+  width: 70%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -438,12 +451,12 @@ button:hover {
 
 .message-wrapper--second {
   padding-bottom: 10px;
+  width: 70%;
+  text-align: left;
   align-self: end;
-  width: 40%;
-  text-align: right;
-  display: flex;
   flex-direction: column;
   align-items: flex-end;
+  display: flex;
 }
 
 .message-bubble {
@@ -458,10 +471,12 @@ button:hover {
 
 .messages-window {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   padding-bottom: 50px;
   padding-right: 50px;
   overflow-y: scroll;
+  flex: 1;
+  /* justify-content: center; */
 }
 
 .message-bubble--second {
@@ -474,6 +489,21 @@ button:hover {
     rgba(0, 0, 0, 0.01) 0px 4px 6px -2px;
   color: white;
   display: inline;
+
+}
+
+.message-bubble--second p {
+  max-width: 700px;
+  word-break: break-all;
+  white-space: normal;
+
+}
+
+.message-bubble p {
+  max-width: 700px;
+  word-break: break-all;
+  white-space: normal;
+
 }
 
 .chat-wrapper {
@@ -481,6 +511,7 @@ button:hover {
   gap: 30px;
   align-items: center;
   margin-top: 10px;
+  padding-right: 30px;
 }
 
 .chat-input {
@@ -491,15 +522,19 @@ button:hover {
 /*messages-list*/
 .messages-container {
   width: 100%;
-  margin: 90px 0 0 0;
+  margin: 90px 30px 0 30px;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-title {
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .user-group {
   display: flex;
+  align-items: center;
 }
 
 .user-group--search {
@@ -512,6 +547,7 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 6px;
+  color: #707070;
 }
 
 .user-group--search-navbar {
@@ -578,4 +614,23 @@ input[type="search"]:focus {
 
 .request-tab {
   margin-top: 30px;
+}
+
+.unseen-background {
+  border: 2px solid #707070;
+  font-weight: bold;
+  color: #707070;
+}
+
+.valid-alert {
+  margin-top: 5px;
+  font-size: 13px;
+  color: red;
+  max-width: 300px;
+}
+
+#list {
+  overflow-y: scroll;
+  flex: 1;
+  padding: 0 10px;
 }
