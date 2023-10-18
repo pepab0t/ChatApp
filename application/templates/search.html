@@ -4,10 +4,9 @@
   <div id="cover">
     <form id="search-form">
       <div class="search-container">
-        <div class="td"><input type="text" placeholder="Search" required id="search-box"></div>
+        <div class="td"><input type="text" placeholder="Search" class="search-input" required id="search-box"></div>
         <div class="td" id="s-cover">
-          <button type="submit">
-            <div id="s-circle"></div>
+          <button class="search-button" type="submit">
             <span>Search</span>
           </button>
         </div>
@@ -69,7 +68,7 @@
         mainDiv.classList.add("message-tab")
         mainDiv.innerHTML = `
   <div class="user-info">
-    <div class="user-group--search">
+    <div class="user-group--search-page">
       <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo" />
       <div class="message-wrap">
         <h3 class="user-name">${username}</h3>
