@@ -22,29 +22,14 @@
     />
   </head>
   <body>
-    {% if nav %}
-    <nav class="navbar"> 
-      <div class="user-group--search user-group--search-navbar ">
-        <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo user-photo--navbar " />
-        <div class="message-wrap">
-          <p class="user-name">{{user.username}}</p>
-        </div>
-        <a href="{{ url_for('views.logout') }}">
-          <div class="logout">
-            <img src="{{ url_for('static', filename='images/shutdown.png')}}" alt="" class="shutdown" />
-            <span>Logout</span>
-          </div>
-        </a>
-      </div>
-    </nav>
-    {% endif %}
     <section class="section">
       <div class="chat-wrap">
         {% if nav %}
         <div class="sidebar">
           <p class="sidebar-logo">
-            <img class="sidebar-logo-img" src="{{ url_for('static', filename='images/whisper-logo.jpg')}}"">
-            Whispr</p>
+            <img class="sidebar-logo-img" src="{{ url_for('static', filename='images/whisper-logo.png')}}"">
+            Whispr
+          </p>
           <div class="sidebar-menu">
             <a class="sidebar-icon" href="{{ url_for('views.home')}}">
               <img
@@ -74,6 +59,31 @@
               Requests
               {% endif %}
             </a>
+            <a class="sidebar-icon" href="{{ url_for('views.logout') }}">
+              <img
+              class="sidebar-image"
+              src="{{ url_for('static', filename='images/logout.png')}}"
+              alt=""
+            />
+            Logout
+            </a>
+          </div>
+          <a class="sidebar-leave" href="{{ url_for('views.home') }}">
+            <img src="{{ url_for('static', filename='images/back.png')}}" alt="">
+          </a>
+          <div class="user-log">
+            <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo user-photo--navbar " />
+            {% if with_user %}
+            <p>Chatting with {{with_user}}</p>
+            {% else %}
+            <p class="user-name">{{user.username}}</p>
+            {% endif %}
+          </div>
+          <div class="mobile-menu-img">
+            <img src="{{ url_for('static', filename='images/menu.png')}}" alt="">
+          </div>
+          <div class="sidebar-cross">
+            <img src="{{ url_for('static', filename='images/cross.png')}}" alt="">
           </div>
         </div>
         {% endif %}
@@ -86,6 +96,59 @@
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(";").shift();
       }
+
+      const menu = document.querySelector(".sidebar-menu")
+    const toggle = document.querySelector(".mobile-menu-img")
+    const close = document.querySelector(".sidebar-cross")
+      const back = document.querySelector(".sidebar-leave")
+      const slug = location.pathname
+
+      console.log(slug)
+      console.log(slug.split('/')[1]);
+
+      switch (slug) {
+        case '/' :
+          back.style.display="none";
+          console.log('homee');
+          break;
+        case '/add_friend' :
+          console.log('add friend');
+          break;
+        case slug.includes('chat') :
+          console.log('chaat');
+          break;
+      }
+
+    if (toggle != null) {
+      toggle.addEventListener("click", ()=> {
+          if (!menu.classList.contains("show-menu")) {
+              menu.classList.add("show-menu")
+              close.style.display="block";
+          } else if (menu.classList.contains("show-menu")) {
+              menu.classList.remove("show-menu")
+              close.style.display="none";
+          }
+      })
+    }
+
+    if(close) {
+        close.addEventListener("click", ()=> {
+            menu.classList.remove("show-menu")
+            close.style.display="none";
+        })
+    }
+
+
+    const link = document.querySelectorAll(".nav__link");
+
+    function linkAction () {
+        const menu = document.querySelector(".nav__menu")
+        menu.classList.remove("show-menu")
+
+    }
+
+    link.forEach(n => n.addEventListener("click", linkAction));
+
     </script>
     {% block script%} {% endblock%}
   </body>

@@ -13,8 +13,8 @@ Login
     <div id="list">
         {% for req in requests %}
         <div class="message-tab request-tab">
-            <div class="user-info">
-                <div class="user-group--search">
+            <div class="user-info user-info-requests">
+                <div class="user-group--search-page">
                 <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo" />
                 <div class="message-wrap">
                     <h3 class="user-name">{{req['sender']['username']}}</h3>

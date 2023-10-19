@@ -6,6 +6,5 @@ tests/
 .vscode/
 .pytest_pycache/
 .coverage
-.env_example
 .env
 mysql/
