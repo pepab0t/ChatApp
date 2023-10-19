@@ -73,11 +73,7 @@
           </a>
           <div class="user-log">
             <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo user-photo--navbar " />
-            {% if with_user %}
-            <p>Chatting with {{with_user}}</p>
-            {% else %}
             <p class="user-name">{{user.username}}</p>
-            {% endif %}
           </div>
           <div class="mobile-menu-img">
             <img src="{{ url_for('static', filename='images/menu.png')}}" alt="">

@@ -3,7 +3,7 @@
   <div class="user-header">
     <div class="user-info--left">
       <img src="{{ url_for('static', filename='images/user.png')}}" alt="" class="user-photo" />
-      <h4 class="user-name">Chatting with: <strong>{{with_user}}</strong></h4>
+      <h4 class="user-name">Chatting with: <strong class="chat-bold">{{with_user}}</strong></h4>
     </div>
     <div class="mobile-menu">
       <a href="">
@@ -35,6 +35,20 @@
 
 {% block script %}
 <script>
+
+  const userText =  document.querySelector('.user-name')
+
+  function handleUserTitle() {
+      if (window.innerWidth <= 830) {
+        userText.innerHTML = 'chatting with {{with_user}}'
+      } else {
+        userText.innerHTML = '{{user.username}}'
+      }
+  }
+
+  handleUserTitle();
+
+  window.addEventListener("resize", handleUserTitle);
   
   let page = 0;
   let pageNext = 1;
@@ -80,7 +94,7 @@
       let originalScroll = messageWindow.scrollTop;
       await load();
       messageWindow.scrollTop = originalScroll;
-      await sleep(1000);
+      await sleep(100);
       loading = false;
       messageWindow.style = "";
     }

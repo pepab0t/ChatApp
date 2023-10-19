@@ -9,14 +9,14 @@
   font-weight: 600;
   font-family: "Inter";
   font-style: normal;
-  src: url("/static/fonts/Inter-SemiBold.ttf") format("truetype");
+  src: url("./fonts/Inter-SemiBold.ttf") format("truetype");
 }
 
 @font-face {
   font-weight: 500;
   font-family: "Inter";
   font-style: normal;
-  src: url("/static/fonts/Inter-Medium.ttf") format("truetype");
+  src: url("./fonts/Inter-Medium.ttf") format("truetype");
 }
 
 body {
@@ -101,6 +101,16 @@ button:hover {
   background-color: #654aae;
   box-shadow: 0px 4px 5px 0px #d1cbe4;
   /* transition: 0.3s; */
+}
+
+.chat-bold {
+  color: #654aae;
+}
+
+.a-redirect {
+  color: #654aae;
+  transition: 0.3s;
+  transform: scale(1.1);
 }
 
 .navbar {
@@ -395,7 +405,7 @@ button:hover {
   flex-direction: column;
   justify-content: end;
   flex: 1;
-  padding: 50px 0px 20px 50px;
+  padding: 80px 20px 20px 20px;
 }
 
 .user-info {
@@ -784,10 +794,6 @@ responsivity */
 
   .user-log {
     padding: 0;
-  }
-
-  .chat-window {
-    padding: 20px;
   }
 
   .sign__logo {
