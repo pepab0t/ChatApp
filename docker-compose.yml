@@ -27,7 +27,5 @@ services:
     environment: 
       MYSQL_DATABASE: chat
       MYSQL_ROOT_PASSWORD: "coffee"
-    ports:
-      - 3306:3306
     volumes:
       - ./mysql:/var/lib/mysql
