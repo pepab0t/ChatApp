@@ -134,6 +134,27 @@ def register():
             message_password="Passwords don't match",
         )
 
+    if len(username) > 20:
+        return render_template(
+            "register.html",
+            email=email,
+            message_email="Username too long (max 20 characters)",
+        )
+
+    if len(email) > 50:
+        return render_template(
+            "register.html",
+            message_email="Email too long (max 50 characters)",
+        )
+
+    if len(password) > 100:
+        return render_template(
+            "register.html",
+            email=email,
+            username=username,
+            message_email="Password exceeded 100 characters",
+        )
+
     response = requests.post(
         get_url("auth.register"),
         json={"username": username, "email": email, "password": password},
