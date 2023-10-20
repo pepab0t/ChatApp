@@ -157,13 +157,14 @@ def register():
     if not response.ok:
         return render_template("login.html")
 
-    token = response.json()
+    data = response.json()
+    session["user_id"] = data["id"]
     r = make_response(redirect(url_for("views.home")))
     set_cookies(
         r,
         {
-            "access_token": token.get("access", ""),
-            "refresh_token": token.get("refresh", ""),
+            "access_token": data.get("access", ""),
+            "refresh_token": data.get("refresh", ""),
         },
     )
     return r
