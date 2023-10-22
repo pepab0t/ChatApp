@@ -155,12 +155,12 @@ def register():
             message_email="Password exceeded 100 characters",
         )
 
-    # response = requests.post(
-    #     get_url("auth.register"),
-    #     json={"username": username, "email": email, "password": password},
-    # )
+    response = requests.post(
+        get_url("auth.register"),
+        json={"username": username, "email": email, "password": password},
+    )
 
-    response = fake_controller.register(username, email, password)
+    # response = fake_controller.register(username, email, password)
 
     if not response.ok:
         data = response.json()
@@ -173,11 +173,11 @@ def register():
 
     user = response.json()
 
-    # auth = (
-    #     "Basic " + base64.b64encode(f"{user['username']}:{password}".encode()).decode()
-    # )
-    # response = requests.post(get_url("auth.login"), headers={"Authorization": auth})
-    response = fake_controller.login(user["username"], password)
+    auth = (
+        "Basic " + base64.b64encode(f"{user['username']}:{password}".encode()).decode()
+    )
+    response = requests.post(get_url("auth.login"), headers={"Authorization": auth})
+    # response = fake_controller.login(user["username"], password)
     if not response.ok:
         return render_template("login.html")
 

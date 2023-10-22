@@ -16,7 +16,9 @@ class FakeResponse:
 
 
 def login(username: str, password: str):
-    payload, code = service.login(service.AuthTuple(username, password))
+    payload, code = service.login(
+        service.AuthTuple(username=username, password=password)
+    )
     response = FakeResponse(payload=payload, status_code=code)
     return response
 

@@ -3,6 +3,7 @@ import os
 from application import create_flask
 from application.auth.entity import UserRegisterEntity
 from application.database import db, models
+from application.repository import get_user_by_username
 
 os.system("rm instance/database.db")
 os.system("rd instance/database.db")
@@ -33,6 +34,8 @@ def create_users():
 
         db.session.add_all(users)
         db.session.commit()
+
+        print(get_user_by_username("pepa"))
 
         # for sen, rec in ((1, 0), (2, 1), (2, 0)):
         #     r = models.Request(sender=users[sen], receiver=users[rec])
