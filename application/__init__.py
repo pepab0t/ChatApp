@@ -17,7 +17,9 @@ from .error_handlers import (
 
 
 def get_url(endpoint: str, **path_params):
-    return f"{request.host_url}{url_for(endpoint, **path_params)}"
+    url = f"{request.host_url[:-1]}{url_for(endpoint, **path_params)}"
+    print(url)
+    return url
 
 
 def create_flask():
