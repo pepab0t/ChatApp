@@ -20,7 +20,7 @@
     </div>
     <div class="sign__screen">
       <div class="sign__title">Sign Up</div>
-      <div class="sign__subtitle">Have an account? <a href="{{ get_url('views.login')}}">Log in</a></div>
+      <div class="sign__subtitle">Have an account? <a class="a-redirect" href="{{ get_url('views.login')}}">Log in</a></div>
       <form class="sign__form" action="{{get_url('views.register')}}" method="post">
         <label>Email</label>
         <input type="text" placeholder="johndoe@example.com" name="email" value="{{email}}"/>

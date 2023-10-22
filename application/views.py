@@ -11,7 +11,8 @@ from flask import (
     url_for,
 )
 
-from . import repository, get_url, auth
+from . import repository, get_url
+from .auth import fake_controller
 
 views = Blueprint("views", __name__, url_prefix="")
 
@@ -63,7 +64,7 @@ def home():
     return r
 
 
-@views.route("/login/", methods=["GET", "POST"])
+@views.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
         return render_template("login.html")
@@ -71,7 +72,6 @@ def login():
     username = request.form.get("username", "")
     password = request.form.get("password", "")
     if username == "" or password == "":
-        print("asdada")
         return render_template(
             "login.html",
             message_username="Please enter username and password",
@@ -86,7 +86,7 @@ def login():
         get_url("auth.login"), headers={"Authorization": authorization}
     )
 
-    # auth.login(auth.AuthTuple(username=username, password=password))
+    response = fake_controller.login(username=username, password=password)
 
     if not response.ok:
         return render_template(
@@ -155,10 +155,12 @@ def register():
             message_email="Password exceeded 100 characters",
         )
 
-    response = requests.post(
-        get_url("auth.register"),
-        json={"username": username, "email": email, "password": password},
-    )
+    # response = requests.post(
+    #     get_url("auth.register"),
+    #     json={"username": username, "email": email, "password": password},
+    # )
+
+    response = fake_controller.register(username, email, password)
 
     if not response.ok:
         data = response.json()
@@ -171,10 +173,11 @@ def register():
 
     user = response.json()
 
-    auth = (
-        "Basic " + base64.b64encode(f"{user['username']}:{password}".encode()).decode()
-    )
-    response = requests.post(get_url("auth.login"), headers={"Authorization": auth})
+    # auth = (
+    #     "Basic " + base64.b64encode(f"{user['username']}:{password}".encode()).decode()
+    # )
+    # response = requests.post(get_url("auth.login"), headers={"Authorization": auth})
+    response = fake_controller.login(user["username"], password)
     if not response.ok:
         return render_template("login.html")
 
