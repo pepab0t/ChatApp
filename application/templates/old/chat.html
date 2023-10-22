@@ -47,7 +47,7 @@ Chat
 
         console.log(message.value);
 
-        fetch("{{ get_url('api.send_message', username='__var1__') }}".replace("__var1__", '{{with_user}}'), {
+        fetch(`${location.origin}{{ url_for('api.send_message', username='__var1__') }}`.replace("__var1__", '{{with_user}}'), {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -69,7 +69,7 @@ Chat
 </script>
 
 <script>
-    fetch("{{get_url('api.get_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}") + new URLSearchParams())
+    fetch(`${location.origin}{{url_for('api.get_messages', username='__var1__')}}`.replace("__var1__", "{{with_user}}") + new URLSearchParams())
     .then(response => response.json())
     .then(json => json.data.forEach(message => createMessage(message.sender, message.text)))
     .catch(error => console.log(error))

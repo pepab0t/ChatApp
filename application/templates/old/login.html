@@ -6,7 +6,7 @@ Login
 {% endblock %}
 
 {% block body%}
-<form id="login_form" method="POST" action="{{ get_url('views.login') }}">
+<form id="login_form" method="POST" action="{{ url_for('views.login') }}">
     <label for="">username</label>
     <input type="text" name="username" id="username_inp">
     <label for="">password</label>

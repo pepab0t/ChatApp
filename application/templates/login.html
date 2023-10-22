@@ -22,12 +22,12 @@
       <div class="sign__logo"><img class="sign__logo-img" src="{{ url_for('static', filename='images/whisper-logo.png') }}" alt="">Whispr</div>
       <div class="sign__title">Sign In</div>
       <div class="sign__subtitle">
-        Dont have an account? <a class="a-redirect" href="{{ get_url('views.register') }}">Register</a>
+        Dont have an account? <a class="a-redirect" href="{{ url_for('views.register') }}">Register</a>
       </div>
       <form
         class="sign__form"
         method="POST"
-        action="{{ get_url('views.login') }}"
+        action="{{ url_for('views.login') }}"
       >
         <label>Username</label>
         <input type="text" placeholder="johndoe1" name="username" value="{{username}}"/>

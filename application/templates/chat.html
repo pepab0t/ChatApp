@@ -150,7 +150,7 @@
 
   async function load() {
     page++;
-    const response = await fetch(`{{get_url('api.get_messages', username='__var1__')}}?page=${pageNext}`.replace("__var1__", "{{with_user}}"));
+    const response = await fetch(`${location.origin}{{url_for('api.get_messages', username='__var1__')}}?page=${pageNext}`.replace("__var1__", "{{with_user}}"));
     const json = await response.json();
     if (response.status >= 200 && response.status < 400) {
       if (json.pages > pageNext){
@@ -166,6 +166,6 @@
     }
   })
 
-  fetch("{{get_url('api.see_messages', username='__var1__')}}".replace("__var1__", "{{with_user}}"))
+  fetch(`${location.origin}{{url_for('api.see_messages', username='__var1__')}}`.replace("__var1__", "{{with_user}}"))
 </script>
 {% endblock %}

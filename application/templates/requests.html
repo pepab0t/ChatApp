@@ -46,27 +46,27 @@ Login
     const token = "{{session['token']}}";
     const acceptRequest = function(rid){
         console.log(rid);
-        fetch("{{ get_url('api.approve_request') }}" + "?" + new URLSearchParams({
+        fetch(`${location.origin}{{ url_for('api.approve_request') }}` + "?" + new URLSearchParams({
             request_id: rid
         }), {
             method: "POST"
         })
         .then( response => {
             if (response.ok) {
-                window.location.replace( "{{ get_url('views.friend_requests') }}" );   
+                window.location.replace( `${location.origin}{{ url_for('views.friend_requests') }}` );   
             }
         })
         .catch( error => console.log(error));
     }
     const declineRequest = function(rid){
-        fetch("{{ get_url('api.decline_request') }}" + "?" + new URLSearchParams({
+        fetch(`${location.origin}{{ url_for('api.decline_request') }}` + "?" + new URLSearchParams({
             request_id: rid
         }), {
             method: "POST"
         })
         .then( response => {
             if (response.ok) {
-                window.location.replace( "{{ get_url('views.friend_requests') }}" );   
+                window.location.replace( `${location.origin}{{ url_for('views.friend_requests') }}` );   
             }
         })
         .catch( error => console.log(error));

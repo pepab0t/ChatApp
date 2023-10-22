@@ -6,7 +6,7 @@ Register
 {% endblock %}
 
 {% block body%}
-<form id="register_form" method="POST" action="{{ get_url('views.register') }}">
+<form id="register_form" method="POST" action="{{ url_for('views.register') }}">
     <label for="">username</label>
     <input type="text" name="username" id="username_inp">
     <label for="">email</label>

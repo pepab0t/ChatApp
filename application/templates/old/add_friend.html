@@ -28,7 +28,7 @@ Login
 
     const sendRequest = function(username){
         
-        fetch(`{{ get_url('api.send_request', username='_/temp/_') }}`.replace('_/temp/_', username), {
+        fetch(`${location.origin}{{ url_for('api.send_request', username='_/temp/_') }}`.replace('_/temp/_', username), {
             method: "POST"
         })
         .then(response => {
@@ -65,7 +65,7 @@ Login
 
         console.log(search_text)
 
-        fetch("{{ get_url('api.search') }}?" + new URLSearchParams({
+        fetch(`${location.origin}{{ url_for('api.search') }}?` + new URLSearchParams({
             search: search_text,
             exclude_friends: 1,
         }))

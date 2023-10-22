@@ -35,7 +35,7 @@
     let searchText = "";
 
     async function sendRequest(username){
-        fetch(`{{ get_url('api.send_request', username='_/temp/_') }}`.replace('_/temp/_', username), {
+        fetch(`${location.origin}{{ url_for('api.send_request', username='_/temp/_') }}`.replace('_/temp/_', username), {
             method: "POST"
         })
         .then(response => {
@@ -92,7 +92,7 @@
 
     async function load(searchTextLocal) {
       page++;
-      const response = await fetch("{{ get_url('api.search') }}?" + new URLSearchParams({
+      const response = await fetch(`${location.origin}{{ url_for('api.search') }}?` + new URLSearchParams({
             search: searchTextLocal,
             exclude_friends: 1,
             page: pageNext,
