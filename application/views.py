@@ -86,7 +86,7 @@ def login():
         get_url("auth.login"), headers={"Authorization": authorization}
     )
 
-    response = fake_controller.login(username=username, password=password)
+    # response = fake_controller.login(username=username, password=password)
 
     if not response.ok:
         return render_template(
@@ -177,7 +177,6 @@ def register():
         "Basic " + base64.b64encode(f"{user['username']}:{password}".encode()).decode()
     )
     response = requests.post(get_url("auth.login"), headers={"Authorization": auth})
-    # response = fake_controller.login(user["username"], password)
     if not response.ok:
         return render_template("login.html")
 

@@ -421,7 +421,7 @@ button:hover {
 
 .user-info:hover {
   transform: scale(1.01);
-  background-color: #e7e7e7;
+  background-color: #d2c0ff;
 }
 
 
@@ -438,10 +438,12 @@ button:hover {
   border-radius: 12px;
 }
 
-.user-info--noresult {
+.no-result {
+  display: flex;
   background-color: #f1f3f3;
   border-radius: 12px;
   justify-content: center;
+  padding: 15px;
 }
 
 .user-photo {
@@ -562,6 +564,7 @@ button:hover {
   margin: 90px 30px 0 30px;
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
 }
 
 .main-title {
